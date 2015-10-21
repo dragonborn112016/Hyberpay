@@ -10,7 +10,8 @@
         'ngRoute',  // routing
         'ngAria',
         'ngAnimate',
-        'ngMaterial'
+        'ngMaterial',
+        'angularVideoBg'
 
 
 

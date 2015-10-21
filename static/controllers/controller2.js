@@ -2,42 +2,32 @@
  * Created by chitra on 13/10/15.
  */
 (function () {
-	
     'use strict';
 
     var controllerId = 'AppCtrl';
 
     angular.module('app')
-        .controller(controllerId, ['$timeout', '$mdSidenav', '$log',AppCtrl]);
+        .controller(controllerId, ['$timeout', '$mdSidenav', '$log','$http', AppCtrl]);
 
-    function AppCtrl($timeout, $mdSidenav, $log) {
+    function AppCtrl($timeout, $mdSidenav, $log, $http) {
         var vm = this;
 
         vm.activate = activate;
 
-        vm.imagePath= "/static/images/voda.jpg";
-        vm.messages = [{
-            face : vm.imagePath,
-            who: 'FreeCharge'
 
-        }, {
-            face : vm.imagePath,
-            who: 'BookmyShow'
+        vm.video = {
+            id: 'ZSt9tm3RoUU'
+        };
 
-        },  {
-            face : vm.imagePath,
-            who: 'MakemyTrip'
-        },{
-            face : vm.imagePath,
-            who: 'IRCTC'
-        }, {
-            face : vm.imagePath,
-            who: 'OYO'
-        }];
+        var str="vm.data.senderName";
 
+        vm.firstChar  = str.charAt(0);
 
+        vm.data=[];
 
-
+        $http.get('https://api.myjson.com/bins/2za98').success(function(data) {
+            vm.data = data;
+        });
 
 
         vm.isOpen = false;
@@ -77,5 +67,7 @@
         }
 
     }
+
+
 
 })();

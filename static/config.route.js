@@ -29,7 +29,7 @@
                 url: '/',
                 config: {
                     title: 'landingPage',
-                    templateUrl: 'portals/home.html',
+                    templateUrl: 'portals/loginPage.html',
                     settings: {
                         nav: 2
 
