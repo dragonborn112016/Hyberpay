@@ -7,9 +7,9 @@
     var controllerId = 'AppCtrl';
 
     angular.module('app')
-        .controller(controllerId, ['$timeout', '$mdSidenav', '$log','$http', AppCtrl]);
+        .controller(controllerId, ['$timeout', '$mdSidenav', '$log','$http','$location', AppCtrl]);
 
-    function AppCtrl($timeout, $mdSidenav, $log, $http) {
+    function AppCtrl($timeout, $mdSidenav, $log, $http, $location) {
         var vm = this;
 
         vm.activate = activate;
@@ -17,6 +17,10 @@
 
         vm.video = {
             id: 'ZSt9tm3RoUU'
+        };
+
+        vm.go = function ( path ) {
+            $location.path( path );
         };
 
         var str="vm.data.senderName";

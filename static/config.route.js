@@ -38,10 +38,10 @@
             },
 
             {
-                url: '/tops',
+                url: '/home',
                 config: {
-                    title: 'tops',
-                    templateUrl: 'portals/tops.html',
+                    title: 'home',
+                    templateUrl: 'portals/home.html',
                     settings: {
                         nav: 2
 
