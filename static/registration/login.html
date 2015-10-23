@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>User Login</title>
+</head>
+<body>
+	
+	<h1>User Login</h1>
+	{% if errors %}
+		<p>{{errors}}</p>
+	{% endif %}
+	<form action="." method='post'>
+		{% csrf_token %}
+		<table>
+		{{form}}
+		</table>
+		<input type ='hidden' name ="next" value="/" />
+		<input type ="submit" value ="login">
+		
+	</form>
+
+</body>
+</html>	
