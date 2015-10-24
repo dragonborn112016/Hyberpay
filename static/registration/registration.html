@@ -4,6 +4,9 @@
 <title>Registration Page</title>
 </head>
 <body>
+	{% if errors %}
+		{{errors}}
+	{% endif %}
 
 	{% if form.has_errors %}
 		<p>errors</p>

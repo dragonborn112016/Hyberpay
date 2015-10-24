@@ -17,13 +17,15 @@ from django.conf.urls import include, url
 from django.contrib import admin
 from HyberPay.views import main_page,portals_page, registration_page,logout_page,\
     login_page
+from HyberPay.Gmail_Access.getMails import auth_return, get_mailIds
 
 urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
     url(r'^$',main_page,name = 'main_page'),
     url(r'^register/$',registration_page,name = 'registration_page'),
     url(r'^portals/(?P<filename>\w+)\.html$',portals_page,name = 'portals_page'),
-    url(r'^login/$', login_page,name='login_page'),
-    url(r'^logout/$',logout_page,name='logout_page' ),
-    
+    url(r'^accounts/login/$', login_page,name='login_page'),
+    url(r'^accounts/logout/$',logout_page,name='logout_page' ),
+    url(r'^accounts/profile/$',get_mailIds ,name = 'gmail_getMails'),
+    url(r'^oauth2callback',auth_return ,name = 'auth_return'),
 ]

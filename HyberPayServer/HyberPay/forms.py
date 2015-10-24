@@ -28,9 +28,9 @@ class RegistrationForm(forms.Form):
         username = self.cleaned_data['username']
         try:
             User.objects.get_by_natural_key(username)
-            raise forms.ValidationError('Username already exists')
         except ObjectDoesNotExist:
             return username
+        raise forms.ValidationError('Username already exists')
         
     
     def clean_contact_no(self):
