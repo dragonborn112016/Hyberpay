@@ -11,7 +11,7 @@
   <br></br>total count : {{count}}
     <table border=1>
       {% for message in messageInHtml %}
-      	<tr><td><div>{{ message|safe }}</div></td></tr>
+      	<tr><td>{{ message|safe }}</td></tr>
       {% endfor %}
     </table>
  

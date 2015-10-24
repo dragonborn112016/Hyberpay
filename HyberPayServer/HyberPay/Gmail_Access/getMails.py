@@ -19,6 +19,9 @@ from oauth2client.client import flow_from_clientsecrets
 from oauth2client.django_orm import Storage
 from HyberPay.Gmail_Access.messageReader import MessageReader
 import base64
+from HyberPay.DataProcessing.CleanData import cleanfiles, filteredData
+from HyberPay.DataProcessing.Computetfidf import compWordFreq, compVocab,\
+    compIDF, compTf
 
 CLIENT_SECRETS = os.path.join(os.path.dirname(__file__),'client_secret.json')
 
@@ -77,9 +80,19 @@ def get_mailIds(request):
         for msg in mes:
             try:
                 message = service.users().messages().get(userId='me', id=msg['id']).execute()
-                mparts =  message['payload']['parts']
                 mheaders =  message['payload']['headers']
+                mdate = message['internalDate']
+                msender =""
+                for header in mheaders:
+                    name = header['name']
+                    if name=="from" or name == "From":
+                        msender = header['value']
+                        break
+                mparts =  message['payload']['parts']
+                
                 mreader = readparts(mparts)
+                
+                
             except errors.HttpError, error:
                 print 'An error occurred: %s' % error
             except Exception, error:
@@ -92,18 +105,28 @@ def get_mailIds(request):
                 elif mime == "text/html":
                     s = base64.urlsafe_b64decode(message['payload']['body']['data'].encode('ASCII'))  
                     mreader.setHtml(s)
+            
+            mreader.setDate(mdate)
+            mreader.setSender(msender)
             msglist.append(mreader.html)
                 
             
         ####################################################################################################
+        # think about threading
         
-        #print mes
-        #print msglist[0]
+        cdata = filteredData(msglist)
+        wordf = compWordFreq(cdata)
+        vocab = compVocab(cdata)
+        idf = compIDF(vocab,wordf)
+        tf = compTf(wordf)
+
+        # process and clean data 
         
+        ####################################################################################################
         return render_to_response('registration/welcome.html', {# to be removed in future-sidharth
                     'messages': mes,
-                    'messageInHtml':msglist,
-                    'count':len(msglist),
+                    'messageInHtml':cdata,
+                    'count':len(cdata),
                     })
         
 
@@ -139,8 +162,8 @@ def readparts(parts):
         try:
             mime = part['mimeType']
             if mime == "text/plain":
-               s = base64.urlsafe_b64decode(part['body']['data'].encode('ASCII'))  
-               mreader.setText(s)
+                s = base64.urlsafe_b64decode(part['body']['data'].encode('ASCII'))  
+                mreader.setText(s)
             elif mime == "text/html":
                 s = base64.urlsafe_b64decode(part['body']['data'].encode('ASCII'))  
                 mreader.setHtml(s)
@@ -150,8 +173,8 @@ def readparts(parts):
                 mreader.setHtml(subreader.html)
                 mreader.setText(subreader.text)
             elif mime == "application/octet-stream":
-               cnt = cnt+1;
-               mreader.setNoOfFiles(cnt)
+                cnt = cnt+1;
+                mreader.setNoOfFiles(cnt)
         except Exception,error:
             print "error occured reading mimeType %s" % error
                 
