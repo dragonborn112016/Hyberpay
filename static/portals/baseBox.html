@@ -27,11 +27,12 @@
                 <div ng-controller="AppCtrl as vm" ng-cloak>
                     <md-content class="md-padding">
                         <ul style="list-style: none;">
-                            <li data-ng-repeat="data in vm.data">
-                                <md-card style="background-color:#F8F8F8;">
+                            <li data-ng-repeat="data in vm.data" track by $index>
+                                <div ng-click="vm.clicked($index)" ng-show="!vm.show[$index]" style="outline:none; " >
+                                <md-card style="background-color:#F8F8F8;max-width:90%;margin: auto" >
                                     <md-card-content style="position: relative">
                                         <div class="date" style="float: right;top:5px;position: absolute;right: 5px;">[[data.date]]</div>
-                                        <img src="{% static "images/voda.jpg" %}" class="face2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>[[data.senderName]]</b>
+                                        <img src="{% static "images/voda.jpg"  %}" class="face2" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>[[data.senderName]]</b>
                                         <br>
                                         <br>
                                         <div class="container-fluid" style="margin-left: 5%">
@@ -61,8 +62,21 @@
                                         </div>
                                     </md-card-content>
                                 </md-card>
-                                <div ><i class="fa fa-share fa-1x" style="padding-right: 4%;padding-left: 4%;color:#1FBAD6 "></i>
-                                    <a href="{% static "images/voda.jpg"%}" download><i class="fa fa-download fa-1x" style="color:#1FBAD6"></i></a></div>
+                                    <div ><i class="fa fa-share fa-1x" style="padding-right: 4%;padding-left: 8%;color:#1FBAD6 "></i>
+                                        <a href="{% static "images/voda.jpg"%}" download >
+                                        <i class="fa fa-download fa-1x" style="color:#1FBAD6"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                                <md-card style="background-color:#F8F8F8;width:100%;margin: auto;box-shadow: 0px 3px 10px grey;margin-bottom: 5px;padding: 5%;outline:none; " ng-click="vm.clicked($index)" ng-show="vm.show[$index]">
+                                    <img src="{% static "images/voda.jpg"%}"><br>
+                                    <div style="float: left"><i class="fa fa-share fa-2x" style="padding-right: 4%;padding-left: 4%;color:#1FBAD6 "></i>
+                                        <a href="{% static "images/voda.jpg"%}" download >
+                                        <i class="fa fa-download fa-2x" style="color:#1FBAD6"></i>
+                                        </a>
+                                    </div>
+                                </md-card>
+
                                 <br/>
                             </li>
                         </ul>
@@ -187,18 +201,7 @@
         box-shadow: 1px 1px 5px grey;
     }
 
-    .exp1{
-        width:35px;
-        height:35px;
-        background-color:#DB4437;
-        border-radius:100%;
-        line-height:35px;
-        text-align:center;
-        vertical-align:middle;
-        display:inline-block;
-        color: white;
-        box-shadow: 1px 1px 5px grey;
-    }
+
 
 </style>
 

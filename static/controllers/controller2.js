@@ -34,13 +34,10 @@
         });
 
 
-        vm.isOpen = false;
 
-        vm.selectedMode = 'md-fling';
 
-        vm.selectedDirection = 'right';
+       /* dashboard */
 
-        vm.toggleLeft = buildToggler('left');
         vm.toggleRight = buildToggler('right');
 
         function debounce(func, wait, context) {
@@ -64,6 +61,23 @@
                     });
             }, 200);
         }
+
+
+        /*view logic*/
+
+        vm.show=[];
+
+        for(var i=0;i<vm.data.length;i++){
+            vm.show[i] = true;
+        }
+        var id1;
+
+        vm.clicked = function(id)
+        {
+            vm.show[id]=!vm.show[id];
+            id1 = id;
+        };
+
 
         activate();
 
