@@ -31,11 +31,14 @@ def cleanfiles(list,ripSpChr=False):
         tmp =tmp.replace("\t"," ")
         
         if ripSpChr:
-            tmp = re.sub("[^a-zA-Z0-9]"," ",tmp)
+            tmp = re.sub("[^a-zA-Z]"," ",tmp)
         
         tmp = tmp.lower()
         words = tmp.split()
-##        words = [w for w in words if not w in stops]
+        #=======================================================================
+        # if ripSpChr:
+        #     words = [w for w in words if not w in stops]
+        #=======================================================================
         res = (" ".join(words))
         cdata.append(res)
 
@@ -57,8 +60,10 @@ def filteredData(list,ripSpChr=False):
                 ];
     fdata=[]
     emptylst = [""," ",None]
-    
+    mapping = []
+    i=-1
     for dta in cdata:
+        i=i+1
         dta = dta.strip()
         if dta in emptylst:
             continue;
@@ -79,6 +84,8 @@ def filteredData(list,ripSpChr=False):
                 if not minflag:
                     continue
                 fdata.append(dta)
+                mapping.append(i)
     
-    return fdata
+    return {'fdata':fdata,
+            'mapping':mapping}
                         

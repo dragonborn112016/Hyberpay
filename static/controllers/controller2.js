@@ -29,7 +29,7 @@
 
         vm.data=[];
 
-        $http.get('https://api.myjson.com/bins/2za98').success(function(data) {
+        $http.get('http://localhost:8000/accounts/profile/').success(function(data) {
             vm.data = data;
         });
 
@@ -85,7 +85,5 @@
         }
 
     }
-
-
 
 })();

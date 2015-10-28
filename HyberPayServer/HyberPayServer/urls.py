@@ -18,6 +18,7 @@ from django.contrib import admin
 from HyberPay.views import main_page,portals_page, registration_page,logout_page,\
     login_page
 from HyberPay.Gmail_Access.getMails import auth_return, get_mailIds
+from HyberPay.DataProcessing.getIdDetaills import tester
 
 urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
@@ -28,4 +29,5 @@ urlpatterns = [
     url(r'^accounts/logout/$',logout_page,name='logout_page' ),
     url(r'^accounts/profile/$',get_mailIds ,name = 'gmail_getMails'),
     url(r'^oauth2callback',auth_return ,name = 'auth_return'),
+    url(r'^test$',tester ,name = 'testing'),
 ]

@@ -22,7 +22,14 @@ import base64
 from HyberPay.DataProcessing.CleanData import cleanfiles, filteredData
 from HyberPay.DataProcessing.Computetfidf import compWordFreq, compVocab,\
     compIDF, compTf
-
+from HyberPay.DataProcessing.mainfun import dataProcessing
+from HyberPay.DataProcessing.getIdDetaills import fetchIdDetails, fetchAmount,\
+    readfiles
+from django.core.files import File
+from django.http.response import JsonResponse
+from django.db.models.expressions import Date
+import datetime
+import time
 CLIENT_SECRETS = os.path.join(os.path.dirname(__file__),'client_secret.json')
 
 FLOW =flow_from_clientsecrets(
@@ -75,8 +82,9 @@ def get_mailIds(request):
         
         ###############################################################################################3
         ##get messages
+        print "fetching mails"
         msglist=[];
-        
+        mreaderlist = []
         for msg in mes:
             try:
                 message = service.users().messages().get(userId='me', id=msg['id']).execute()
@@ -96,7 +104,7 @@ def get_mailIds(request):
             except errors.HttpError, error:
                 print 'An error occurred: %s' % error
             except Exception, error:
-                print 'An error occurred: %s' % error # parts not accessible
+                #print 'An error occurred: %s' % error # parts not accessible
                 mreader = MessageReader()
                 mime = message['payload']['mimeType']
                 if mime == "text/plain":
@@ -109,28 +117,206 @@ def get_mailIds(request):
             mreader.setDate(mdate)
             mreader.setSender(msender)
             msglist.append(mreader.html)
-                
+            mreaderlist.append(mreader)
             
-        ####################################################################################################
-        # think about threading
         
+        print "got mails"
+        
+        det=[]
         cdata = filteredData(msglist)
-        wordf = compWordFreq(cdata)
-        vocab = compVocab(cdata)
-        idf = compIDF(vocab,wordf)
-        tf = compTf(wordf)
-
-        # process and clean data 
+        mapping =cdata['mapping']
+        fdata = cdata['fdata']
+        writetofiles(fdata, len(fdata))
+        mappedCdata = []
+        mappedHtmlData=[]
+        clus1 = readfiles(len(fdata),True)
+        #=======================================================================
+        # print "clus1 :" ,len(clus1)
+        # print "msglist :" ,len(msglist)
+        # #===========================================================================
+        #=======================================================================
+        # a2 = dataProcessing(clus1)
+        #===========================================================================
+        i=-1
+        jsonlist = []
+        for data in clus1:
+            jsondict = {}
+            Iddetails = fetchIdDetails(data)
+            details1 = Iddetails
+            details1.append('total')
+            amt = fetchAmount(data)
+            details1 = details1+amt
+            i=i+1;
+            if len(details1)<4:
+                continue # create mapping also
+            mappedCdata.append(data)
+            mappedHtmlData.append(msglist[mapping[i]])
+            mreader1 = mreaderlist[mapping[i]]
+            details1.append("date")
+            date  = mreader1.date
+            dte = time.strftime('%d/%m/%Y',  time.gmtime(int(date)/1000))
+            #datetime.datetime.fromtimestamp(int(date)).strftime('%Y-%m-%d %H:%M:%S')
+            details1.append(dte)
+            details1.append("sender")
+            sender =  str(mreader1.sender)
+            jsondict['sender'] = sender
+            jsondict['date']=dte
+            jsondict['ammount'] = amt[0]
+            i1=0
+            j1=1
+            while j1 <len(Iddetails):
+                jsondict[Iddetails[i1]] =Iddetails[j1]
+                i1+=2
+                j1+=2
+                
+            jsondict['html_content']=mreader1.html
+            #===================================================================
+            # print type(sender)
+            #===================================================================
+            details1.append(sender)
+            details1 = " ".join(details1)
+            det.append(details1)
+            jsonlist.append(jsondict)
         
-        ####################################################################################################
-        return render_to_response('registration/welcome.html', {# to be removed in future-sidharth
-                    'messages': mes,
-                    'messageInHtml':cdata,
-                    'count':len(cdata),
-                    })
-        
+        #=======================================================================
+        # print jsonlist
+        #=======================================================================
+        print "det :",len(det)
+        print "mappedhtml :",len(mappedHtmlData)
+        print "mapped cdata :",len(mappedCdata)
+        response  = HttpResponse()
+        response = JsonResponse(jsonlist,safe=False)    
+        return response
+        #=======================================================================
+        # return render_to_response('registration/welcome.html', {# to be removed in future-sidharth
+        #             'messages': clus1,
+        #             'clust1':det,
+        #             'clust2':mappedHtmlData,
+        #             'clust3':mappedCdata
+        #             })
+        #=======================================================================
 
-
+         #=======================================================================
+        # cdata = filteredData(msglist)
+        # writetofiles(cdata, len(cdata))    
+        # return render_to_response('registration/welcome.html', {# to be removed in future-sidharth
+        #         'messages': mes,
+        #         'messageInHtml':cdata,
+        #         'count':len(msglist),
+        #         })
+        #         
+        #=======================================================================
+            
+#===============================================================================
+#         ####################################################################################################
+#         # think about threading
+#         
+#         cdata = filteredData(msglist,True)
+#         a2 = dataProcessing(cdata)
+#         cdata1 = cleanfiles(msglist)
+#         print "clusteres processing"
+#         clus1 = [cdata1[i] for i in a2[0][1]]
+#         clus2 = [cdata1[i] for i in a2[1][1]]
+#         clus3 = [cdata1[i] for i in a2[2][1]]
+#         clus4 = [cdata1[i] for i in a2[3][1]]
+#         #clus3 =clus3 + [" new cluster started"] +clus4
+#         i=0
+#         det1 = []
+#         for data in clus1:
+#             try:
+#                 d  = data.encode("unicode-escape")
+#                 details1 = fetchIdDetails(d)
+#                 details1.append('total')
+#                 details1 = details1+fetchAmount(d)
+#             except Exception, error :
+#                 details1 = []
+#                 print "cluster 1 : error %s" %error 
+#                 continue
+#             details1 = " ".join(details1)
+#             det1.append(details1)
+#             i=i+1;
+#         
+#         
+#         print "done clus1"
+#         i=0
+#         det2 = []
+#         for data in clus2:
+#             try:
+#                 d  = data.encode("unicode-escape")
+#                 details2 = fetchIdDetails(d)
+#                 details2.append('total')
+#                 details2 = details2+fetchAmount(d)
+#             except Exception,error:
+#                 details2=[]
+#                 d  = data.encode("unicode-escape")
+#                 print "cluster 2: %s" %error
+#                 continue
+#             details2 =" ".join(details2)
+#             det2.append(details2)
+#             i=i+1;
+#         
+#         i=0
+#         det3 = []
+#         for data in clus3:
+#             try:
+#                 d  = data.encode("unicode-escape")
+#                 details3 = fetchIdDetails(d)
+#                 details3.append('total')
+#                 details3 = details3+fetchAmount(d)
+#             except Exception,error:
+#                 details3=[]
+#                 
+#                 print "cluster 3: %s" %error
+#                 continue
+#             details3 =" ".join(details3)
+#             det3.append(details3)
+#             i=i+1;
+#         
+#         i=0
+#         det4 = []
+#         for data in clus4:
+#             try:
+#                 d  = data.encode("unicode-escape")
+#                 details4 = fetchIdDetails(d)
+#                 details4.append('total')
+#                 details4 = details4+fetchAmount(d)
+#             except Exception,error:
+#                 details4=[]
+#                 d  = data.encode("unicode-escape")
+#                 print "cluster 4: %s " %error
+#                 continue
+#             details4=" ".join(details4) 
+#             det4.append(details4)
+#             
+#             i=i+1;
+#         
+#         clus1 = [msglist[i] for i in a2[0][1]]
+#         clus2 = [msglist[i] for i in a2[1][1]]
+#         clus3 = [msglist[i] for i in a2[2][1]]
+#         clus4 = [msglist[i] for i in a2[3][1]]
+# 
+#         # process and clean data 
+#         
+#         ####################################################################################################
+#         return render_to_response('registration/welcome.html', {# to be removed in future-sidharth
+#                     'messages': mes,
+#                     'messageInHtml':msglist,
+#                     'cluster1':clus1,
+#                     'cluster2':clus2,
+#                     'cluster3':clus3,
+#                     'cluster4':clus4,
+#                     'count':len(cdata),
+#                     'details1':det1,
+#                     'details2':det2,
+#                     'details3':det3,
+#                     'details4':det4,
+#                     'len1':len(det1),
+#                     'len2':len(det2),
+#                     'len3':len(det3),
+#                     'len4':len(det4)
+#                     })
+#         
+#===============================================================================
 
 
 def ListMessagesMatchingQuery(service, user_id, query=''):
@@ -179,3 +365,17 @@ def readparts(parts):
             print "error occured reading mimeType %s" % error
                 
     return mreader
+
+
+def writetofiles(list,cnt):
+    
+    BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+
+    for i in range(cnt):
+        
+        fname =os.path.join(BASE_DIR,'rawdata/rawdata'+str(i)+'.txt') 
+        fo =open(fname,'w')
+        fo.write(list[i].encode('ascii', 'ignore'))
+        fo.close()
+
