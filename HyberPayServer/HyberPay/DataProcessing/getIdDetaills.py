@@ -12,6 +12,7 @@ from nltk import FreqDist
 from django.shortcuts import render_to_response
 from HyberPay.DataProcessing.mainfun import dataProcessing
 from HyberPay.DataProcessing.CleanData import filteredData
+from HyberPay.DataProcessing.readWriteFiles import readfiles
 
 ORDER_VOCAB = ('order','ticket','pnr','payment','paisapay','transaction','bill','payment','booking','reference')
 
@@ -199,34 +200,12 @@ def fetchAmount(dta):
 ##    print details
 
 
-def readfiles(cnt,isDel=False):
-    list =[]
-    BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
-    for i in range(cnt):
-        fname =os.path.join(BASE_DIR,'rawdata/rawdata'+str(i)+'.txt') 
-        fo =open(fname,'r')
-        data = fo.read()
-        list.append(data)
-        fo.close()
-    if isDel:
-        folder = os.path.join(BASE_DIR,'rawdata')
-        for the_file in os.listdir(folder):
-            file_path = os.path.join(folder, the_file)
-            try:
-                if os.path.isfile(file_path):
-                    os.unlink(file_path)
-                #elif os.path.isdir(file_path): shutil.rmtree(file_path)
-            except Exception, e:
-                print e
-
-    return list
 
 
 def tester(request):
     i=0
     det=[]
-    clus1 = readfiles(86)
+    clus1 = readfiles('rawdata')
     mappedCdata = []
     #===========================================================================
     # a2 = dataProcessing(clus1)

@@ -12,7 +12,7 @@ from django.http import HttpResponse
 from django.http import HttpResponseBadRequest
 from django.http import HttpResponseRedirect
 from django.shortcuts import render_to_response
-from HyberPay.models import CredentialsModel
+from HyberPay.models import CredentialsModel, UserContactModel, UserMailsModel
 from HyberPayServer import settings
 from oauth2client import xsrfutil
 from oauth2client.client import flow_from_clientsecrets
@@ -23,13 +23,19 @@ from HyberPay.DataProcessing.CleanData import cleanfiles, filteredData
 from HyberPay.DataProcessing.Computetfidf import compWordFreq, compVocab,\
     compIDF, compTf
 from HyberPay.DataProcessing.mainfun import dataProcessing
-from HyberPay.DataProcessing.getIdDetaills import fetchIdDetails, fetchAmount,\
-    readfiles
+from HyberPay.DataProcessing.getIdDetaills import fetchIdDetails, fetchAmount
 from django.core.files import File
 from django.http.response import JsonResponse
 from django.db.models.expressions import Date
 import datetime
 import time
+from HyberPay.DataProcessing.readWriteFiles import writetofiles, readfiles
+from HyberPay.Classification.classifydata import do_classification
+from django.db.models import Max
+from HyberPay.Classification.traindata import ClassificationPreComputing, getCategory
+from HyberPay.Classification.category import category
+from inspect import getcallargs
+
 CLIENT_SECRETS = os.path.join(os.path.dirname(__file__),'client_secret.json')
 
 FLOW =flow_from_clientsecrets(
@@ -46,7 +52,11 @@ def auth_return(request):
                                    request.user):
         print request.user
         print request.REQUEST['state']
-        error =  request.REQUEST['error']
+        try:
+            error =  request.REQUEST['error']
+        except Exception,er:
+            print "error in authorization %s" %er
+            error = ""
         lst= [""," ",None];
         if error not in lst:
             return HttpResponseRedirect("/")
@@ -72,118 +82,47 @@ def get_mailIds(request):
         except :
             return HttpResponseRedirect('/')
     else:
+        username = request.user
+        user = UserContactModel.objects.get(user=username)
+        timestamp = 0
+        try:
+            umm = UserMailsModel.objects.filter(ucm =user).aggregate(Max('timestamp'))
+            print umm
+            timestamp = umm['timestamp__max']
+        except Exception,error:
+            print "exception while reading database %s" %error  
+            
         http = httplib2.Http(cache='.cache')
         http = credential.authorize(http)
         service = build("gmail", "v1", http=http)
         
-        mes = ListMessagesMatchingQuery(service, 'me', query="({+order +booking +booked +ticket +pnr +bill}"
-                + " {+price +fare +amount} {+id +no})")
-        
-        
-        ###############################################################################################3
-        ##get messages
         print "fetching mails"
-        msglist=[];
-        mreaderlist = []
-        for msg in mes:
-            try:
-                message = service.users().messages().get(userId='me', id=msg['id']).execute()
-                mheaders =  message['payload']['headers']
-                mdate = message['internalDate']
-                msender =""
-                for header in mheaders:
-                    name = header['name']
-                    if name=="from" or name == "From":
-                        msender = header['value']
-                        break
-                mparts =  message['payload']['parts']
-                
-                mreader = readparts(mparts)
-                
-                
-            except errors.HttpError, error:
-                print 'An error occurred: %s' % error
-            except Exception, error:
-                #print 'An error occurred: %s' % error # parts not accessible
-                mreader = MessageReader()
-                mime = message['payload']['mimeType']
-                if mime == "text/plain":
-                    s = base64.urlsafe_b64decode(message['payload']['body']['data'].encode('ASCII'))  
-                    mreader.setText(s)
-                elif mime == "text/html":
-                    s = base64.urlsafe_b64decode(message['payload']['body']['data'].encode('ASCII'))  
-                    mreader.setHtml(s)
-            
-            mreader.setDate(mdate)
-            mreader.setSender(msender)
-            msglist.append(mreader.html)
-            mreaderlist.append(mreader)
-            
-        
+        res = fetchmails(service,timestamp)
         print "got mails"
         
-        det=[]
-        cdata = filteredData(msglist)
-        mapping =cdata['mapping']
-        fdata = cdata['fdata']
-        writetofiles(fdata, len(fdata))
-        mappedCdata = []
-        mappedHtmlData=[]
-        clus1 = readfiles(len(fdata),True)
-        #=======================================================================
-        # print "clus1 :" ,len(clus1)
-        # print "msglist :" ,len(msglist)
-        # #===========================================================================
-        #=======================================================================
-        # a2 = dataProcessing(clus1)
-        #===========================================================================
-        i=-1
-        jsonlist = []
-        for data in clus1:
-            jsondict = {}
-            Iddetails = fetchIdDetails(data)
-            details1 = Iddetails
-            details1.append('total')
-            amt = fetchAmount(data)
-            details1 = details1+amt
-            i=i+1;
-            if len(details1)<4:
-                continue # create mapping also
-            mappedCdata.append(data)
-            mappedHtmlData.append(msglist[mapping[i]])
-            mreader1 = mreaderlist[mapping[i]]
-            details1.append("date")
-            date  = mreader1.date
-            dte = time.strftime('%d/%m/%Y',  time.gmtime(int(date)/1000))
-            #datetime.datetime.fromtimestamp(int(date)).strftime('%Y-%m-%d %H:%M:%S')
-            details1.append(dte)
-            details1.append("sender")
-            sender =  str(mreader1.sender)
-            jsondict['sender'] = sender
-            jsondict['date']=dte
-            jsondict['ammount'] = amt[0]
-            i1=0
-            j1=1
-            while j1 <len(Iddetails):
-                jsondict[Iddetails[i1]] =Iddetails[j1]
-                i1+=2
-                j1+=2
-                
-            jsondict['html_content']=mreader1.html
-            #===================================================================
-            # print type(sender)
-            #===================================================================
-            details1.append(sender)
-            details1 = " ".join(details1)
-            det.append(details1)
-            jsonlist.append(jsondict)
+        print "saving mails"
+        saveUserMails(user,res[1])
+        print "saved"
+        
+        
+        ##res[0]=msglist res[1]=mreaderlist
+        ## msglist = msg in html
+        msglist = res[0]
+        mreaderlist = res[1]
+        if timestamp:
+            dbdet = getListfromdb(user)
+            msglist = msglist+dbdet[0]
+            mreaderlist = mreaderlist+dbdet[1]
         
         #=======================================================================
-        # print jsonlist
+        # redir = do_classification(request,msglist,mreaderlist)
+        # print "done classification"
+        # 
         #=======================================================================
-        print "det :",len(det)
-        print "mappedhtml :",len(mappedHtmlData)
-        print "mapped cdata :",len(mappedCdata)
+        print "retrieving data"
+        jsonlist = get_gmailData(msglist, mreaderlist)
+        
+        print "retrieved json"
         response  = HttpResponse()
         response = JsonResponse(jsonlist,safe=False)    
         return response
@@ -198,7 +137,7 @@ def get_mailIds(request):
 
          #=======================================================================
         # cdata = filteredData(msglist)
-        # writetofiles(cdata, len(cdata))    
+        # writetofiles(cdata, 'rawdata')    
         # return render_to_response('registration/welcome.html', {# to be removed in future-sidharth
         #         'messages': mes,
         #         'messageInHtml':cdata,
@@ -318,6 +257,35 @@ def get_mailIds(request):
 #         
 #===============================================================================
 
+def saveUserMails(usercontactmodel,mreaderlist):
+    
+    for mreader in mreaderlist:
+        umm = UserMailsModel()
+        umm.ucm = usercontactmodel
+        umm.html_mail = mreader.html
+        umm.timestamp = mreader.date
+        umm.sender = mreader.sender
+        umm.noOfFiles = mreader.no_of_files
+        umm.save()
+
+def getListfromdb(usercontactmodel):
+    res = UserMailsModel.objects.filter(ucm=usercontactmodel)
+    msglist = []
+    mreaderlist=[]
+    
+    for umm in res:
+        mreader= MessageReader()
+        mreader.setDate(umm.timestamp)
+        mreader.setHtml(umm.html_mail)
+        mreader.setNoOfFiles(0)
+        mreader.setSender(umm.sender)
+        mreader.setText("")
+        mreader.setNoOfFiles(umm.noOfFiles)
+        mreaderlist.append(mreader)
+        msglist.append(umm.html_mail)
+    res = [msglist,mreaderlist]
+    return res
+
 
 def ListMessagesMatchingQuery(service, user_id, query=''):
 
@@ -366,16 +334,122 @@ def readparts(parts):
                 
     return mreader
 
-
-def writetofiles(list,cnt):
+def fetchmails(service,timestamp):
     
-    BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
-
-    for i in range(cnt):
+    query="({+order +booking +booked +ticket +pnr +bill}"+" {+price +fare +amount} {+id +no})"
+    if timestamp:
+        query = query+" after:"+str(timestamp)
+    
+    mes = ListMessagesMatchingQuery(service, 'me', query)
+    
+    msglist=[];
+    mreaderlist = []
+    
+    for msg in mes:
+        try:
+            message = service.users().messages().get(userId='me', id=msg['id']).execute()
+            mheaders =  message['payload']['headers']
+            mdate = message['internalDate']
+            msender =""
+            for header in mheaders:
+                name = header['name']
+                if name=="from" or name == "From":
+                    msender = header['value']
+                    break
+            mparts =  message['payload']['parts']
+            
+            mreader = readparts(mparts)
+            
+            
+        except errors.HttpError, error:
+            print 'An error occurred: %s' % error
+        except Exception, error:
+            #print 'An error occurred: %s' % error # parts not accessible
+            mreader = MessageReader()
+            mime = message['payload']['mimeType']
+            if mime == "text/plain":
+                s = base64.urlsafe_b64decode(message['payload']['body']['data'].encode('ASCII'))  
+                mreader.setText(s)
+            elif mime == "text/html":
+                s = base64.urlsafe_b64decode(message['payload']['body']['data'].encode('ASCII'))  
+                mreader.setHtml(s)
         
-        fname =os.path.join(BASE_DIR,'rawdata/rawdata'+str(i)+'.txt') 
-        fo =open(fname,'w')
-        fo.write(list[i].encode('ascii', 'ignore'))
-        fo.close()
+        mreader.setDate(mdate)
+        mreader.setSender(msender)
+        msglist.append(mreader.html)
+        mreaderlist.append(mreader)
+    
+    res = [msglist,mreaderlist]
+    return res    
 
+def get_gmailData(msglist,mreaderlist):
+    
+    det=[]
+    cdata = filteredData(msglist)
+    mapping =cdata['mapping']
+    fdata = cdata['fdata']
+    writetofiles(fdata, 'rawdata')
+    mappedCdata = []
+    mappedHtmlData=[]
+    clus1 = readfiles('rawdata', isDel=True)
+    #=======================================================================
+    # print "clus1 :" ,len(clus1)
+    # print "msglist :" ,len(msglist)
+    # #===========================================================================
+    #=======================================================================
+    # a2 = dataProcessing(clus1)
+    #===========================================================================
+    i=-1
+    jsonlist = []
+    print "precomputing"
+    precompute = ClassificationPreComputing()
+    print "precomputing done"
+    
+    for data in clus1:
+        jsondict = {}
+        Iddetails = fetchIdDetails(data)
+        details1 = Iddetails
+        details1.append('total')
+        amt = fetchAmount(data)
+        details1 = details1+amt
+        i=i+1;
+        if len(details1)<4:
+            continue # create mapping also
+        mappedCdata.append(data)
+        mappedHtmlData.append(msglist[mapping[i]])
+        mreader1 = mreaderlist[mapping[i]]
+        details1.append("date")
+        date  = mreader1.date
+        dte = time.strftime('%d/%m/%Y',  time.gmtime(int(date)/1000))
+        #datetime.datetime.fromtimestamp(int(date)).strftime('%Y-%m-%d %H:%M:%S')
+        details1.append(dte)
+        details1.append("sender")
+        label = getCategory(data,precompute[0],precompute[1],precompute[2],precompute[3],precompute[4])
+        sender =  str(mreader1.sender)
+        jsondict['sender'] = sender
+        jsondict['date']=dte
+        jsondict['ammount'] = amt[0]
+        jsondict['label'] = label
+        i1=0
+        j1=1
+        while j1 <len(Iddetails):
+            jsondict[Iddetails[i1]] =Iddetails[j1]
+            i1+=2
+            j1+=2
+            
+        jsondict['html_content']=mreader1.html
+        #===================================================================
+        # print type(sender)
+        #===================================================================
+        details1.append(sender)
+        details1 = " ".join(details1)
+        det.append(details1)
+        jsonlist.append(jsondict)
+    
+    #=======================================================================
+    # print jsonlist
+    #=======================================================================
+    print "det :",len(det)
+    print "mappedhtml :",len(mappedHtmlData)
+    print "mapped cdata :",len(mappedCdata)
+    return jsonlist

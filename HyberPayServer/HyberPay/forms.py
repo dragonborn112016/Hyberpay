@@ -50,3 +50,5 @@ class RegistrationForm(forms.Form):
                 return password2
         raise forms.ValidationError('passwords do not match')
         
+class ClassificationForm(forms.Form):
+    category = forms.CharField(max_length=10)

@@ -38,8 +38,12 @@ class Migration(migrations.Migration):
             name='UserMailsModel',
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('orignal_mail', models.TextField()),
-                ('user_id', models.ForeignKey(to='HyberPay.UserContactModel')),
+                ('html_mail', models.TextField()),
+                ('timestamp', models.IntegerField()),
+                ('sender', models.TextField()),
+                ('noOfFiles', models.IntegerField()),
+                ('category', models.IntegerField(null=True, blank=True)),
+                ('ucm', models.ForeignKey(to='HyberPay.UserContactModel')),
             ],
         ),
         migrations.AddField(

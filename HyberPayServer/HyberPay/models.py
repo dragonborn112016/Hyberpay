@@ -1,13 +1,10 @@
 from django.db import models
 
 # Create your models here.
-import pickle
-import base64
 
 from django.contrib import admin
 from django.contrib.auth.models import User
 
-from oauth2client.django_orm import FlowField
 from oauth2client.django_orm import CredentialsField
 
 class UserContactModel(models.Model):
@@ -15,8 +12,12 @@ class UserContactModel(models.Model):
     contact_no = models.CharField(max_length=15)
 
 class UserMailsModel(models.Model):
-    user_id = models.ForeignKey(UserContactModel)
-    orignal_mail = models.TextField()    
+    ucm = models.ForeignKey(UserContactModel)
+    html_mail = models.TextField()    
+    timestamp = models.IntegerField()
+    sender = models.TextField()
+    noOfFiles = models.IntegerField()
+    category = models.IntegerField(null = True,blank=True)
     #catagory, orderid item etc fields to be created later on
 
 class ContactsModel(models.Model):
@@ -26,8 +27,8 @@ class ContactsModel(models.Model):
     
 
 class CredentialsModel(models.Model):
-  id = models.OneToOneField(User, primary_key=True)
-  credential = CredentialsField()
+    id = models.OneToOneField(User, primary_key=True)
+    credential = CredentialsField()
 
 
 class CredentialsAdmin(admin.ModelAdmin):
@@ -35,3 +36,4 @@ class CredentialsAdmin(admin.ModelAdmin):
 
 
 admin.site.register(CredentialsModel, CredentialsAdmin)
+

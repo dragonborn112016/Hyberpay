@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Classification</title>
+</head>
+<body>
+	<form method="POST" action=".">
+	{% csrf_token %}
+	{{data|safe}}
+	<br></br><br></br>  
+	category={'0':'negetive',
+              '1':'others',
+              '2':'utility',
+              '3':'travel',
+              #'4':'food',
+              }
+    <br></br>
+    <p> enter label:</p>
+    {{form}}
+    <br></br>
+    <input type ="submit" value="submit"/>
+	</form>
+</body>
+</html>
