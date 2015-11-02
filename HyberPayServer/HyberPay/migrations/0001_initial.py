@@ -41,6 +41,7 @@ class Migration(migrations.Migration):
                 ('html_mail', models.TextField()),
                 ('timestamp', models.IntegerField()),
                 ('sender', models.TextField()),
+                ('text_mail', models.TextField()),
                 ('noOfFiles', models.IntegerField()),
                 ('category', models.IntegerField(null=True, blank=True)),
                 ('ucm', models.ForeignKey(to='HyberPay.UserContactModel')),

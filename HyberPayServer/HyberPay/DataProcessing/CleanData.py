@@ -4,8 +4,7 @@ Created on Oct 24, 2015
 @author: SIDHARTH
 '''
 
-
-from bs4 import BeautifulSoup             
+             
 import nltk
 import os
 import re
@@ -44,8 +43,11 @@ def cleanfiles(list,ripSpChr=False):
 
     return cdata
 
-def filteredData(list,ripSpChr=False):
-    cdata = cleanfiles(list, ripSpChr)
+def filteredData(list,doclean = False,ripSpChr=False):
+    if doclean:
+        cdata = cleanfiles(list, ripSpChr)
+    else:
+        cdata = list
     keyset= [
                 'order',
                 'booking', 

@@ -12,6 +12,7 @@ class MessageReader():
         self.no_of_files=0
         self.sender=''
         self.date=0
+        self.label = ''
     
     def setText(self,text):
         self.text=text
@@ -27,3 +28,6 @@ class MessageReader():
     
     def setDate(self,date):
         self.date=date
+        
+    def setLabel(self,label):
+        self.label=label

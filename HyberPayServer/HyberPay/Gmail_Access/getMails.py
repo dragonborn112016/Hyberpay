@@ -1,17 +1,12 @@
-from django.shortcuts import render
 
 # Create your views here.
 import os
-import logging
 import httplib2
 from apiclient import errors
 from apiclient.discovery import build
 from django.contrib.auth.decorators import login_required
-from django.core.urlresolvers import reverse
 from django.http import HttpResponse
-from django.http import HttpResponseBadRequest
 from django.http import HttpResponseRedirect
-from django.shortcuts import render_to_response
 from HyberPay.models import CredentialsModel, UserContactModel, UserMailsModel
 from HyberPayServer import settings
 from oauth2client import xsrfutil
@@ -19,22 +14,14 @@ from oauth2client.client import flow_from_clientsecrets
 from oauth2client.django_orm import Storage
 from HyberPay.Gmail_Access.messageReader import MessageReader
 import base64
-from HyberPay.DataProcessing.CleanData import cleanfiles, filteredData
-from HyberPay.DataProcessing.Computetfidf import compWordFreq, compVocab,\
-    compIDF, compTf
-from HyberPay.DataProcessing.mainfun import dataProcessing
+from HyberPay.DataProcessing.CleanData import filteredData
 from HyberPay.DataProcessing.getIdDetaills import fetchIdDetails, fetchAmount
-from django.core.files import File
 from django.http.response import JsonResponse
-from django.db.models.expressions import Date
-import datetime
 import time
 from HyberPay.DataProcessing.readWriteFiles import writetofiles, readfiles
-from HyberPay.Classification.classifydata import do_classification
 from django.db.models import Max
 from HyberPay.Classification.traindata import ClassificationPreComputing, getCategory
-from HyberPay.Classification.category import category
-from inspect import getcallargs
+from HyberPay.Classification.classifydata import classifycleanfiles
 
 CLIENT_SECRETS = os.path.join(os.path.dirname(__file__),'client_secret.json')
 
@@ -107,18 +94,11 @@ def get_mailIds(request):
         
         ##res[0]=msglist res[1]=mreaderlist
         ## msglist = msg in html
-        msglist = res[0]
-        mreaderlist = res[1]
-        if timestamp:
-            dbdet = getListfromdb(user)
-            msglist = msglist+dbdet[0]
-            mreaderlist = mreaderlist+dbdet[1]
-        
-        #=======================================================================
-        # redir = do_classification(request,msglist,mreaderlist)
-        # print "done classification"
-        # 
-        #=======================================================================
+    
+        dbdet = getListfromdb(user)
+        msglist = dbdet[0]
+        mreaderlist = dbdet[1]
+    
         print "retrieving data"
         jsonlist = get_gmailData(msglist, mreaderlist)
         
@@ -135,7 +115,7 @@ def get_mailIds(request):
         #             })
         #=======================================================================
 
-         #=======================================================================
+        #=======================================================================
         # cdata = filteredData(msglist)
         # writetofiles(cdata, 'rawdata')    
         # return render_to_response('registration/welcome.html', {# to be removed in future-sidharth
@@ -262,6 +242,11 @@ def saveUserMails(usercontactmodel,mreaderlist):
     for mreader in mreaderlist:
         umm = UserMailsModel()
         umm.ucm = usercontactmodel
+        
+        x = classifycleanfiles(mreader.html)
+        writetofiles([x],'temp')
+        x = readfiles('temp',True)
+        umm.text_mail = x[0]
         umm.html_mail = mreader.html
         umm.timestamp = mreader.date
         umm.sender = mreader.sender
@@ -279,7 +264,7 @@ def getListfromdb(usercontactmodel):
         mreader.setHtml(umm.html_mail)
         mreader.setNoOfFiles(0)
         mreader.setSender(umm.sender)
-        mreader.setText("")
+        mreader.setText(umm.text_mail)
         mreader.setNoOfFiles(umm.noOfFiles)
         mreaderlist.append(mreader)
         msglist.append(umm.html_mail)
@@ -336,7 +321,7 @@ def readparts(parts):
 
 def fetchmails(service,timestamp):
     
-    query="({+order +booking +booked +ticket +pnr +bill}"+" {+price +fare +amount} {+id +no})"
+    query="label:inbox ({+order +booking +booked +ticket +pnr +bill+invoice}"+" {+price +fare +amount} {+id +no})"
     if timestamp:
         query = query+" after:"+str(timestamp)
     
@@ -384,52 +369,76 @@ def fetchmails(service,timestamp):
 
 def get_gmailData(msglist,mreaderlist):
     
-    det=[]
-    cdata = filteredData(msglist)
+    #===========================================================================
+    # det=[]
+    #===========================================================================
+    tdata=[]
+    for mreader in mreaderlist:
+        tdata.append(mreader.text)
+    cdata = filteredData(tdata)
     mapping =cdata['mapping']
     fdata = cdata['fdata']
-    writetofiles(fdata, 'rawdata')
-    mappedCdata = []
-    mappedHtmlData=[]
-    clus1 = readfiles('rawdata', isDel=True)
-    #=======================================================================
-    # print "clus1 :" ,len(clus1)
-    # print "msglist :" ,len(msglist)
-    # #===========================================================================
-    #=======================================================================
-    # a2 = dataProcessing(clus1)
     #===========================================================================
-    i=-1
+    # mappedCdata = []
+    # mappedHtmlData=[]
+    #===========================================================================
+    
     jsonlist = []
     print "precomputing"
     precompute = ClassificationPreComputing()
     print "precomputing done"
     
-    for data in clus1:
+    print "classifying :"
+    i=-1
+    for data in fdata:
+        i+=1
+        label = getCategory(data,precompute[0],precompute[1],precompute[2],precompute[3],precompute[4])
+        mreader1 = mreaderlist[mapping[i]]
+        mreader1.setLabel(label)
+        mreaderlist[mapping[i]] = mreader1
+    print "done classification"
+    
+    i=-1
+    print "len of filererd data :",len(fdata)
+    
+    for data in fdata:
+        i=i+1;
         jsondict = {}
         Iddetails = fetchIdDetails(data)
         details1 = Iddetails
         details1.append('total')
         amt = fetchAmount(data)
         details1 = details1+amt
-        i=i+1;
         if len(details1)<4:
             continue # create mapping also
-        mappedCdata.append(data)
-        mappedHtmlData.append(msglist[mapping[i]])
+        if not amt:
+            amt=[""]
+        print "details :" ,details1
         mreader1 = mreaderlist[mapping[i]]
-        details1.append("date")
+        print "label :", mreader1.label
+        
+        
+        
+        #=======================================================================
+        # mappedCdata.append(data)
+        # mappedHtmlData.append(msglist[mapping[i]])
+        #=======================================================================
+        
+        #=======================================================================
+        # details1.append("date")
+        #=======================================================================
         date  = mreader1.date
         dte = time.strftime('%d/%m/%Y',  time.gmtime(int(date)/1000))
         #datetime.datetime.fromtimestamp(int(date)).strftime('%Y-%m-%d %H:%M:%S')
-        details1.append(dte)
-        details1.append("sender")
-        label = getCategory(data,precompute[0],precompute[1],precompute[2],precompute[3],precompute[4])
+        #=======================================================================
+        # details1.append(dte)
+        # details1.append("sender")
+        #=======================================================================
         sender =  str(mreader1.sender)
         jsondict['sender'] = sender
         jsondict['date']=dte
         jsondict['ammount'] = amt[0]
-        jsondict['label'] = label
+        jsondict['label'] = mreader1.label
         i1=0
         j1=1
         while j1 <len(Iddetails):
@@ -441,15 +450,20 @@ def get_gmailData(msglist,mreaderlist):
         #===================================================================
         # print type(sender)
         #===================================================================
-        details1.append(sender)
-        details1 = " ".join(details1)
-        det.append(details1)
+        #=======================================================================
+        # details1.append(sender)
+        # details1 = " ".join(details1)
+        # det.append(details1)
+        #=======================================================================
         jsonlist.append(jsondict)
     
     #=======================================================================
     # print jsonlist
     #=======================================================================
-    print "det :",len(det)
-    print "mappedhtml :",len(mappedHtmlData)
-    print "mapped cdata :",len(mappedCdata)
+    #===========================================================================
+    # print "det :",len(det)
+    # print "mappedhtml :",len(mappedHtmlData)
+    # print "mapped cdata :",len(mappedCdata)
+    #===========================================================================
+    print "data len :",len(jsonlist) 
     return jsonlist

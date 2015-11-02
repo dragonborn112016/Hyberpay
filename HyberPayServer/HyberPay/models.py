@@ -16,6 +16,7 @@ class UserMailsModel(models.Model):
     html_mail = models.TextField()    
     timestamp = models.IntegerField()
     sender = models.TextField()
+    text_mail = models.TextField()
     noOfFiles = models.IntegerField()
     category = models.IntegerField(null = True,blank=True)
     #catagory, orderid item etc fields to be created later on
