@@ -1,18 +1,18 @@
 {% load staticfiles %}
-<div class="baseBox" style="padding: 7% 0% 5% 5%;overflow-x: hidden;">
+<div class="baseBox" style="padding: 7% 4% 5% 3%;overflow-x: hidden;">
     <div class="container-fluid">
         <div class="row">
-            <div class="col-md-2">
+            <div class="col-md-2" >
                 <div class="sidebar-nav-fixed affix">
                     <div ng-controller="AppCtrl as vm" ng-cloak>
 
                         <md-content style="background-color:#F8F8F8;box-shadow: 0px 1px 3px grey;" >
                             <div style="background-color: rgb(31, 186, 214);height: 30px;color: white;text-align: center;font-size: large;font-weight: 700;padding: 2%" >Recent</div>
                             <md-list style="height: 250px;width: 200px;overflow-x: hidden">
-                                <md-list-item class="md-1-line" ng-repeat="item in vm.data">
-                                    <img ng-src=" [[item.face]] " class="face">
+                                <md-list-item class="md-1-line" ng-repeat="data in vm.data">
+                                    <img ng-src=" [[data.face]] " class="face">
                                     <div class="md-list-item-text">
-                                        <h6>[[item.senderName]]</h6>
+                                        <h6>[[data.sender]]</h6>
                                     </div>
                                 </md-list-item>
                             </md-list>
@@ -21,18 +21,17 @@
                 </div>
                 <!--/sidebar-nav-fixed -->
             </div>
-            <!--/span-->
-            <div class="col-md-8">
 
-                <div ng-controller="AppCtrl as vm" ng-cloak>
+            <div class="col-md-9" >
+
+                <div ng-controller="AppCtrl as vm" >
                     <md-content class="md-padding">
-                        <ul style="list-style: none;">
-                            <li data-ng-repeat="data in vm.data" track by $index>
+                            <div data-ng-repeat="data in vm.data" track by $index>
                                 <div ng-click="vm.clicked($index)" ng-show="!vm.show[$index]" style="outline:none; " >
                                 <md-card style="background-color:#F8F8F8;max-width:90%;margin: auto" >
                                     <md-card-content style="position: relative">
                                         <div class="date" style="float: right;top:5px;position: absolute;right: 5px;">[[data.date]]</div>
-                                        <img src="{% static "images/voda.jpg"  %}" class="face2" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>[[data.senderName]]</b>
+                                        <img src="{% static "images/voda.jpg"  %}" class="face2" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>[[data.sender]]</b>
                                         <br>
                                         <br>
                                         <div class="container-fluid" style="margin-left: 5%">
@@ -40,22 +39,23 @@
 
                                                 <div class="col-md-4">
                                                     <div style="text-align:none;font-size: 15px;color:gray">Category</div><br>
-                                                    <div class="exp" style="line-height:100px;background-color: white;color:#1FBAD6;font-weight: 600 "> <i class="fa fa-mobile fa-3x"></i></div><br><br>
-                                                    <div style="text-align:none;font-size: 15px;">Recharge</div>
+                                                    <div class="exp" style="line-height:100px;background-color: white;color:#1FBAD6;font-weight: 600;margin-bottom: 25px; " ng-show="vm.data.category == 'Recharge'"> <i class="fa fa-mobile fa-3x"></i></div>
+                                                    <div class="exp" style="line-height:100px;background-color: white;color:#1FBAD6;font-weight: 600;margin-bottom: 25px; " ng-show="vm.data.category == 'Travel'"> <i class="fa fa-plane fa-2x"></i></div>
+                                                    <div style="text-align:none;font-size: 15px;">[[vm.data.category]]</div>
                                                 </div>
 
                                                 <div class="col-md-4">
                                                     <div style="text-align:none;font-size: 15px;color:gray">Retailer</div><br>
-                                                    <img src="{% static "images/voda.jpg" %}" class="face1"><br><br>
+                                                    <img src="{% static "images/voda.jpg" %}" class="face1" style="margin-bottom: 25px;">
                                                     <div style="font-size: 18px; font-weight:500">Vodafone</div>
                                                 </div>
 
                                                 <div class="col-md-4">
                                                     <div style="text-align:none;font-size: 15px;color:gray">Amount</div><br>
-                                                    <div class="exp" style="background-color: white;color:#1FBAD6;font-weight: 600"><i class="fa fa-inr" style="font-size: 15px;"></i>&nbsp;<span style="font-size: 20px;">[[data.details]]</span></div><br><br>
+                                                    <div class="exp" style="background-color: white;color:#1FBAD6;font-weight: 600;"><i class="fa fa-inr" style="font-size: 15px;"></i>&nbsp;<span style="font-size: 20px;">[[data.ammount]]</span></div><br><br>
                                                     <div style="color:#3CD515;font-size: 20px;border-color:#3CD515;border-style: solid;margin-left: 25%;margin-right: 25%">PAID</div>
-                                                    <span style="font-size: 12px;">No.9765667889</span><br>
-                                                    <span style="font-size: 10px;">Id:8EHJHE0EHE9E</span>
+
+                                                    <span style="font-size: 10px;">Id:[[data.order]]</span>
                                                 </div>
 
                                             </div>
@@ -68,31 +68,31 @@
                                         </a>
                                     </div>
                                 </div>
-                                <md-card style="background-color:#F8F8F8;width:100%;margin: auto;box-shadow: 0px 3px 10px grey;margin-bottom: 5px;padding: 5%;outline:none; " ng-click="vm.clicked($index)" ng-show="vm.show[$index]">
-                                    <img src="{% static "images/voda.jpg"%}"><br>
-                                    <div style="float: left"><i class="fa fa-share fa-2x" style="padding-right: 4%;padding-left: 4%;color:#1FBAD6 "></i>
+                                <md-card style="background-color:#F8F8F8;max-width:100%;margin:auto; autobox-shadow:0px 3px 10px grey;margin-bottom: 5px;padding: 5%;outline:none; " ng-click="vm.clicked($index)" ng-show="vm.show[$index]">
+                                    <div ng-bind-html="data.html_content" style="margin: 5%;"></div><br>
+                                    <div style="float: left"><i class="fa fa-share fa-1x" style="padding-right: 4%;padding-left: 4%;color:#1FBAD6 "></i>
                                         <a href="{% static "images/voda.jpg"%}" download >
-                                        <i class="fa fa-download fa-2x" style="color:#1FBAD6"></i>
+                                        <i class="fa fa-download fa-1x" style="color:#1FBAD6"></i>
                                         </a>
                                     </div>
                                 </md-card>
 
                                 <br/>
-                            </li>
-                        </ul>
+                            </div>
+
 
                     </md-content>
                 </div>
 
             </div>
             <!--/span-->
-            <div class="col-md-2">
+            <div class="col-md-1" >
                 <div class="sidebar-nav-fixed pull-right affix">
                     <div ng-controller="AppCtrl as vm" layout="column" style="height:550px;" ng-cloak>
                         <section layout="row" flex>
                             <md-content flex layout-padding>
                                 <div style="float:right">
-                                    <md-button ng-click="vm.toggleRight()"
+                                    <md-button aria-label="toggle" ng-click="vm.toggleRight()"
                                                class="md-primary">
                                         <i class="fa fa-bars fa-3x" style="color: #1FBAD6"></i>
                                     </md-button>
@@ -105,7 +105,7 @@
                                 <md-toolbar ng-controller="RightCtrl as vm"  class="md-theme-light" style="background-color:white">
                                     <ul>
                                         <li  style="display: inline-block"><span class="md-toolbar-tools" style="font-size:25px; font-weight: 500;color: #1FBAD6"><i class="fa fa-line-chart"></i>&nbsp;&nbsp;DASHBOARD</span></li>
-                                        <li style="display: inline-block;float: right;margin-top:10px;"><md-button ng-click="vm.close()" class="md-primary">
+                                        <li style="display: inline-block;float: right;margin-top:10px;"><md-button aria-label="Close" ng-click="vm.close()" class="md-primary">
                                             <i class="fa fa-times fa-2x" style="color: #1FBAD6"></i>
                                         </md-button></li>
                                     </ul>
@@ -118,8 +118,8 @@
                         </section>
                     </div>
                 </div>
-                <!--/sidebar-nav-fixed -->
-            </div>
+                <!--/sidebar-nav-fixed
+            </div>-->
             <!--/span-->
         </div>
         <!--/row-->
@@ -166,7 +166,7 @@
 
     md-sidenav, md-sidenav.md-locked-open, md-sidenav.md-closed.md-locked-open-add-active {
         min-width: 200px !important;
-        width: 70vw !important;
+        width: 75vw !important;
         max-width: 1800px !important;
     }
     #circle-icon {
