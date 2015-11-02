@@ -39,9 +39,11 @@
 
                                                 <div class="col-md-4">
                                                     <div style="text-align:none;font-size: 15px;color:gray">Category</div><br>
-                                                    <div class="exp" style="line-height:100px;background-color: white;color:#1FBAD6;font-weight: 600;margin-bottom: 25px; " ng-show="vm.data.category == 'Recharge'"> <i class="fa fa-mobile fa-3x"></i></div>
-                                                    <div class="exp" style="line-height:100px;background-color: white;color:#1FBAD6;font-weight: 600;margin-bottom: 25px; " ng-show="vm.data.category == 'Travel'"> <i class="fa fa-plane fa-2x"></i></div>
-                                                    <div style="text-align:none;font-size: 15px;">[[vm.data.category]]</div>
+                                                    <div class="exp" style="line-height:100px;background-color: white;color:#1FBAD6;font-weight: 600;margin-bottom: 25px; " ng-show="data.label == 'utility'"> <i class="fa fa-shopping-cart fa-2x"></i></div>
+                                                    <div class="exp" style="line-height:100px;background-color: white;color:#1FBAD6;font-weight: 600;margin-bottom: 25px; " ng-show="data.label == 'travel'"> <i class="fa fa-plane fa-2x"></i></div>
+                                                    <div class="exp" style="line-height:100px;background-color: white;color:#1FBAD6;font-weight: 600;margin-bottom: 25px; " ng-show="data.label == 'others'"> <i class="fa fa-gg fa-2x"></i></div>
+                                                    <div class="exp" style="line-height:100px;background-color: white;color:#1FBAD6;font-weight: 600;margin-bottom: 25px; " ng-show="data.label == 'refund'"> <i class="fa fa-money fa-2x"></i></div>
+                                                    <div style="text-align:none;font-size: 15px;">[[data.label]]</div>
                                                 </div>
 
                                                 <div class="col-md-4">
@@ -62,6 +64,7 @@
                                         </div>
                                     </md-card-content>
                                 </md-card>
+                                    
                                     <div ><i class="fa fa-share fa-1x" style="padding-right: 4%;padding-left: 8%;color:#1FBAD6 "></i>
                                         <a href="{% static "images/voda.jpg"%}" download >
                                         <i class="fa fa-download fa-1x" style="color:#1FBAD6"></i>
