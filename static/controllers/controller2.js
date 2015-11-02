@@ -7,9 +7,9 @@
     var controllerId = 'AppCtrl';
 
     angular.module('app')
-        .controller(controllerId, ['$timeout', '$mdSidenav', '$log','$http','$location', AppCtrl]);
+        .controller(controllerId, ['$timeout', '$mdSidenav', '$log','$http','$location','$sce', AppCtrl]);
 
-    function AppCtrl($timeout, $mdSidenav, $log, $http, $location) {
+    function AppCtrl($timeout, $mdSidenav, $log, $http, $location, $sce) {
         var vm = this;
 
         vm.activate = activate;
@@ -19,19 +19,49 @@
             id: 'ZSt9tm3RoUU'
         };
 
+
+        /*gmail login*/
+
+
+            vm.onSignIn = function(googleUser) {
+            console.log("gmail");
+            console.log('Logged in as: ' + googleUser.getBasicProfile().getName());
+
+            // Useful data for your client-side scripts:
+            var profile = googleUser.getBasicProfile();
+            console.log("ID: " + profile.getId()); // Don't send this directly to your server!
+            console.log("Name: " + profile.getName());
+            console.log("Image URL: " + profile.getImageUrl());
+            console.log("Email: " + profile.getEmail());
+
+            // The ID token you need to pass to your backend:
+            var id_token = googleUser.getAuthResponse().id_token;
+            console.log("ID Token: " + id_token);
+
+        };
+
+
         vm.go = function ( path ) {
             $location.path( path );
         };
 
-        var str="vm.data.senderName";
 
-        vm.firstChar  = str.charAt(0);
 
         vm.data=[];
+        vm.pre_data =[];
 
         $http.get('http://localhost:8000/accounts/profile/').success(function(data) {
-            vm.data = data;
+            vm.pre_data =angular.fromJson(data);
+            
+            console.log(vm.pre_data.label);
+            for(var i=0; i<vm.pre_data.length; i++){
+            vm.data.push({sender:vm.pre_data[i].sender,date:vm.pre_data[i].date,html_content:$sce.trustAsHtml(vm.pre_data[i].html_content),ammount:vm.pre_data[i].ammount,label:vm.pre_data[i].label})
+        }
+
         });
+
+
+
 
 
 
@@ -63,7 +93,7 @@
         }
 
 
-        /*view logic*/
+        /*view */
 
         vm.show=[];
 
