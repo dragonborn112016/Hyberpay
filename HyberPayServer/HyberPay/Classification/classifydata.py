@@ -169,3 +169,9 @@ def defaultclassification():
 # #===============================================================================
 # print "done"
 #===============================================================================
+def writeDbData():
+    umms = UserMailsModel.objects.all()
+    X=[]
+    for umm in umms:
+        X.append(umm.text_mail)
+    writetofiles(X, 'rawdata') 
