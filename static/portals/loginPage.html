@@ -9,8 +9,60 @@
             <br>
             <br>
             <button type="button" class="btn btn-default btn-lg" style=" background-color:transparent; border: 1px solid red;color: red;"  ng-click="vm.go('/home')"><i class="fa fa-google-plus" style="color: red" ></i>&nbsp;&nbsp;&nbsp;Login with Google</button><br><br>
-            <button type="button" class="btn btn-default btn-lg" style="background-color: transparent; border: 1px solid white;color: white"><i class="fa fa-envelope-o" ></i>&nbsp;&nbsp;&nbsp;Login with Email&nbsp;&nbsp;&nbsp;</button>
+            <button type="button" class="btn btn-default btn-lg" style="background-color: transparent; border: 1px solid white;color: white"><i class="fa fa-envelope-o" ></i>&nbsp;&nbsp;&nbsp;Login with Email&nbsp;&nbsp;&nbsp;</button><br><br>
+            <button id="signinButton">Sign in with Google</button>
+            <script>
+                $('#signinButton').click(function() {
+                    // signInCallback defined in step 6.
+                    auth2.grantOfflineAccess({'redirect_uri': 'postmessage'}).then(signInCallback);
+                });
+
+            </script>
+            <div id="result"></div>
+
         </div>
 
     </video-bg>
+
+
 </div>
+
+
+<script>
+    function signInCallback(authResult) {
+        console.log("signin");
+        console.log(authResult);
+        if (authResult['code']) {
+            console.log("true");
+
+            // Hide the sign-in button now that the user is authorized, for example:
+            $('#signinButton').attr('style', 'display: none');
+
+
+
+            // Send the code to the server
+            $.ajax({
+                type: 'POST',
+                url: 'http://localhost:8000',
+                contentType: 'application/octet-stream; charset=utf-8',
+                success: function(result) {
+                    console.log("send");
+                    console.log(result);
+                    // Handle or verify the server response.
+                },
+                processData: false,
+                data: {
+                    authResult: ['code'],
+                    csrfmiddlewaretoken: '{{ csrf_token }}'
+                }
+
+
+            });
+        } else {
+            // There was an error.
+            console.log("error");
+        }
+    }
+</script>
+
+

@@ -21,7 +21,8 @@
     "angular-material": "~0.11.2",
     "angular-animate": "~1.4.7",
     "angular-aria": "~1.4.7",
-    "angular-video-bg": "~0.3.3"
+    "angular-video-bg": "~0.3.3",
+    "angular-directive.g-signin": "~0.1.2"
   },
   "resolutions": {
     "angular": "~1.4.7"
