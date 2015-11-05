@@ -16,9 +16,8 @@ Including another URLconf
 from django.conf.urls import include, url
 from django.contrib import admin
 from HyberPay.views import main_page,portals_page, registration_page,logout_page,\
-    login_page
+    login_page, tester
 from HyberPay.Gmail_Access.getMails import auth_return, get_mailIds
-from HyberPay.DataProcessing.getIdDetaills import tester
 
 urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),

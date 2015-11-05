@@ -112,3 +112,6 @@ def login_page(request):
 def logout_page(request):
     logout(request)
     return HttpResponseRedirect('/')
+def tester(request):
+    print "in here"
+    return HttpResponse('<html><body>in test</body></html>')

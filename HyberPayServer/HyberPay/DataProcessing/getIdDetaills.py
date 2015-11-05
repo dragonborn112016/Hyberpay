@@ -125,11 +125,40 @@ def fetchIdDetails(dta):
 
 def fetchAmount(dta):
     dta1 = splitAndRemSp(dta)
-    a=nltk.ngrams(dta1,4)
+    a=nltk.ngrams(dta1,5)
     keywords =['subtotal','fare','amount','paid']
     filter = ['distance']
     details = []
     flag=False
+    
+    for row in a:
+        if flag:
+            break
+        
+        if 'total' in row[0]:
+            if row[1] in keywords:
+                j=0
+
+                for wrd in row:
+                    if j<2:
+                        j=j+1
+                        continue
+                    lett = str(wrd)
+                    if (not lett.isalpha())and len(lett)>1:
+                        for w in lett:
+                            if w.isdigit():
+                                flag=True
+                                break
+                    if flag:
+##                        print row
+                        wrd1 = re.sub('^[a-z]*[^a-zA-Z0-9]*[a-z]*[^a-zA-Z0-9]*',"",wrd)
+                        details.append(wrd1)
+                        break
+    
+    if flag:
+        return details
+    
+    a=nltk.ngrams(dta1,5)
 
     for row in a:
 
@@ -141,43 +170,37 @@ def fetchAmount(dta):
         if patt:
             for wrd in row:
                 lett = str(wrd)
-                if not lett.isalpha():
+                if (not lett.isalpha())and len(lett)>1:
                     for w in lett:
                         if w.isdigit():
                             flag=True
                             break
                 if flag:
 ##                    print row
-                    details.append(wrd)
+                    wrd1 = re.sub('^[a-z]*[^a-zA-Z0-9]*[a-z]*[^a-zA-Z0-9]*',"",wrd)
+                    details.append(wrd1)
                     break
                 
-        if 'total' in row[0]:
-            if row[1] in keywords:
-                j=0
 
-                for wrd in row:
-                    if j<2:
-                        j=j+1
-                        continue
-                    lett = str(wrd)
-                    if not lett.isalpha():
-                        for w in lett:
-                            if w.isdigit():
-                                flag=True
-                                break
-                    if flag:
-##                        print row
-                        details.append(wrd)
-                        break
+            
+    if flag:
+        return details
+    
+    a=nltk.ngrams(dta1,5)
 
+    for row in a:
+        if flag:
+            break
         if row[0] in keywords:
             j=-1
 
             for wrd in row:
                 j=j+1;
                 lett = str(wrd)
-                if j==3:
-                    break
+                #===============================================================
+                # if j==3:
+                #     break
+                #===============================================================
 
                 if j==1 and lett.isdigit():
                     continue
@@ -186,7 +209,7 @@ def fetchAmount(dta):
                 if wrd in filter:
                     break
                 
-                if (not lett.isalpha()):
+                if (not lett.isalpha())and len(lett)>1:
                     for w in lett:
                         if w.isdigit():
                             flag=True
@@ -194,43 +217,10 @@ def fetchAmount(dta):
 
                 if flag:
 ##                    print row
-                    details.append(wrd)
+                    wrd1 = re.sub('^[a-z]*[^a-zA-Z0-9]*[a-z]*[^a-zA-Z0-9]*',"",wrd)
+                    details.append(wrd1)
                     break
+
+
     return details
 ##    print details
-
-
-
-
-def tester(request):
-    i=0
-    det=[]
-    clus1 = readfiles('rawdata')
-    mappedCdata = []
-    #===========================================================================
-    # a2 = dataProcessing(clus1)
-    #===========================================================================
-    for data in clus1:
-        details1 = fetchIdDetails(data)
-        details1.append('total')
-        details1 = details1+fetchAmount(data)
-        if len(details1)<4:
-            continue # create mapping also
-        details1 = " ".join(details1)
-        mappedCdata.append(data)
-        det.append(details1)
-        i=i+1;
-        
-    a2 = dataProcessing(filteredData(mappedCdata,True))
-    clust1  = [mappedCdata[i] for i in set(a2[0][1])]
-    clust2  = [mappedCdata[i] for i in set(a2[1][1])]
-    clust3  = [mappedCdata[i] for i in set(a2[2][1])]
-    
-    return render_to_response('registration/welcome.html', {# to be removed in future-sidharth
-                'messages': clust1,
-                'clust1':det,
-                'clust2':clust2,
-                'clust3':clust3
-                })
-
-    
