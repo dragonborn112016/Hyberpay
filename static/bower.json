@@ -22,7 +22,10 @@
     "angular-animate": "~1.4.7",
     "angular-aria": "~1.4.7",
     "angular-video-bg": "~0.3.3",
-    "angular-directive.g-signin": "~0.1.2"
+    "angular-directive.g-signin": "~0.1.2",
+    "angular-ui-calendar": "~1.0.1",
+    "moment": "~2.10.6",
+    "angular-material-icons": "~0.6.0"
   },
   "resolutions": {
     "angular": "~1.4.7"

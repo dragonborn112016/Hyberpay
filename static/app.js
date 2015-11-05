@@ -11,7 +11,8 @@
         'ngAria',
         'ngAnimate',
         'ngMaterial',
-        'angularVideoBg'
+        'angularVideoBg',
+        'ui.calendar'
 
 
 
