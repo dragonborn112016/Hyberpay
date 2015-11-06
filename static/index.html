@@ -37,36 +37,12 @@
 <script src="{% static "bower_components/angular-material-icons/angular-material-icons.min.js" %}"></script>
 
 
-<!--google api scripts-->
-
-<script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
-<script src="https://apis.google.com/js/client:platform.js?onload=start" async defer></script>
-
-<script>
-    function start() {
-
-        gapi.load('auth2', function() {
-            auth2 = gapi.auth2.init({
-                client_id: '782274586213-91oe449116oq1704pbrs95tp2suc68lo.apps.googleusercontent.com',
-                fetch_basic_profile: true
-                // Scopes to request in addition to 'profile' and 'email'
-                //scope: 'additional_scope'
-            });
-
-
-
-        });
-
-
-    }
-</script>
-
-
 <!--bootstrapping -->
 <script src="{% static "app.js" %}"></script>
 <script src="{% static "config.route.js" %}"></script>
 <script src="{% static "controllers/controller2.js" %}"></script>
 <script src="{% static "controllers/controller4.js" %}"></script>
+<script src="{% static "controllers/dashboard.js" %}"></script>
 
 
 </body>

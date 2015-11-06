@@ -1,7 +1,5 @@
 
-<div class="container-fluid" ng-controller="AppCtrl as vm" style="width: 100%;height: 100%;
-    
-    text-shadow: darkslategray;background-color:rgba(0,0,0,0.5);">
+<div class="container-fluid" ng-controller="AppCtrl as vm" style="width: 100%;height: 100%;position: absolute;top: 0;bottom: 0;text-shadow: darkslategray;background-color:rgba(0,0,0,0.5);background-color: black">
     <!--<video-bg video-id="vm.video.id">-->
 
         <div class="login-form" style="padding: 40px;text-align: center;margin-left: 30%;margin-right: 30%;margin-top: 12%;border-radius: 10px; border: 1px solid white;text-shadow: darkslategray;background-color:rgba(0,0,0,0.5);">
@@ -12,17 +10,9 @@
             </div>
             <br>
             <br>
-            <button type="button" class="btn btn-default btn-lg" style=" background-color:transparent; border: 1px solid red;color: red;"  ng-click="vm.go('/home')"><i class="fa fa-google-plus" style="color: red" ></i>&nbsp;&nbsp;&nbsp;Login with Google</button><br><br>
+            <button type="button" class="btn btn-default btn-lg" style=" background-color:transparent; border: 1px solid red;color: red;"  ng-if="vm.go('/home')"><i class="fa fa-google-plus" style="color: red" ></i>&nbsp;&nbsp;&nbsp;Login with Google</button><br><br>
             <button type="button" class="btn btn-default btn-lg" style="background-color: transparent; border: 1px solid white;color: white"><i class="fa fa-envelope-o" ></i>&nbsp;&nbsp;&nbsp;Login with Email&nbsp;&nbsp;&nbsp;</button><br><br>
-            <button id="signinButton">Sign in with Google</button>
-            <script>
-                $('#signinButton').click(function() {
-                    // signInCallback defined in step 6.
-                    auth2.grantOfflineAccess({'redirect_uri': 'postmessage'}).then(signInCallback);
-                });
 
-            </script>
-            <div id="result"></div>
 
         </div>
 
@@ -32,43 +22,5 @@
 </div>
 
 
-
-<script>
-    function signInCallback(authResult) {
-        console.log("signin");
-        console.log(authResult);
-        if (authResult['code']) {
-            console.log("true");
-
-            // Hide the sign-in button now that the user is authorized, for example:
-            $('#signinButton').attr('style', 'display: none');
-
-            auth2.signIn().then(function() {
-                var profile = auth2.currentUser.get().getBasicProfile();
-                console.log('ID: ' + profile.getId());
-                console.log('Name: ' + profile.getName());
-                console.log('Image URL: ' + profile.getImageUrl());
-                console.log('Email: ' + profile.getEmail());
-            });
-
-            // Send the code to the server
-            $.ajax({
-                type: 'GET',
-                url: 'http://localhost:8000/test',
-                contentType: 'application/octet-stream; charset=utf-8',
-                success: function(result) {
-                    console.log("send");
-                    console.log(result);
-                    // Handle or verify the server response.
-                },
-                processData: false,
-                data: authResult['code']
-                    });
-        } else {
-            // There was an error.
-            console.log("error");
-        }
-    }
-</script>
 
 

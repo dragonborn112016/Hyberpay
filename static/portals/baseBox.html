@@ -71,12 +71,14 @@
                                         </a>
                                     </div>
                                 </div>
-                                <md-card style="background-color:#F8F8F8;max-width:100%;margin:auto; autobox-shadow:0px 3px 10px grey;margin-bottom: 5px;padding: 5%;outline:none; " ng-click="vm.clicked($index)" ng-show="vm.show[$index]">
-                                    <div ng-bind-html="data.html_content" style="margin: 5%;"></div><br>
-                                    <div style="float: left"><i class="fa fa-share fa-1x" style="padding-right: 4%;padding-left: 4%;color:#1FBAD6 "></i>
+                                <md-card style="max-width:100%;margin:auto;margin-bottom: 5px;padding: 5%;background-color:#F8F8F8; autobox-shadow:0px 3px 10px grey;outline:none; " ng-click="vm.clicked($index)" ng-show="vm.show[$index]">
+                                    <div class="">
+                                        <div ng-bind-html="data.html_content" style="margin: 5%;max-width:100%; width:100%;"></div><br>
+                                        <div style="float: left"><i class="fa fa-share fa-1x" style="padding-right: 4%;padding-left: 4%;color:#1FBAD6 "></i>
                                         <a href="{% static "images/voda.jpg"%}" download >
                                         <i class="fa fa-download fa-1x" style="color:#1FBAD6"></i>
                                         </a>
+                                         </div>
                                     </div>
                                 </md-card>
 
