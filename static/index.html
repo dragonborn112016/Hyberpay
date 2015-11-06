@@ -12,18 +12,30 @@
     <link rel="stylesheet" href="{% static "bower_components/bootstrap/dist/css/bootstrap.min.css" %}">
     <link rel="stylesheet" href="{% static "bower_components/font-awesome/css/font-awesome.min.css" %}">
     <link rel="stylesheet" href="{% static "bower_components/angular-material/angular-material.css" %}">
-    <link rel="stylesheet" href="{% static "bower_components/fullcalendar/dist/fullcalendar.css" %}">
-    <link rel="stylesheet" href="{% static "bower_components/angular-material-icons/angular-material-icons.css" %}">
 
 </head>
-<body>
+<body >
+
+<div class="container-fluid" ng-controller="AppCtrl as vm" >
+
+			{% if user and not user.is_anonymous %}
+			
+				<input type="hidden" id = 'loggedin' name ='loggedin' value=true>
+				<div ng-init="vm.go('/home')">
+				<a>Hello, {{ user.get_full_name }}!
+				</a>
+				<br>
+				<a href="social/logout">Logout</a>
+			{% else %}
+				<a href="{% url 'social:begin' 'google-oauth2' %}?next={{ request.path }}">Login with google</a>
+			{% endif %}
+</div>
 
 <div ng-view></div>
 
 <!--vendor scripts-->
 
 <script src="{% static "bower_components/jquery/dist/jquery.js" %}" ></script>
-<script src="{% static "bower_components/moment/moment.js" %}"></script>
 <script src="{% static "bower_components/angular/angular.js" %}"></script>
 <script src="{% static "bower_components/angular-route/angular-route.js" %}"></script>
 <script src="{% static "bower_components/angular-aria/angular-aria.js" %}"></script>
@@ -31,10 +43,8 @@
 <script src="{% static "bower_components/angular-material/angular-material.js" %}"></script>
 <script src="{% static "bower_components/bootstrap/dist/js/bootstrap.min.js" %}"></script>
 <script src="{% static "bower_components/angular-video-bg/angular-video-bg.js" %}"></script>
-<script src="{% static "bower_components/angular-ui-calendar/src/calendar.js" %}"></script>
-<script src="{% static "bower_components/fullcalendar/dist/fullcalendar.js" %}"></script>
-<script src="{% static "bower_components/fullcalendar/dist/gcal.js" %}"></script>
-<script src="{% static "bower_components/angular-material-icons/angular-material-icons.min.js" %}"></script>
+
+
 
 
 <!--bootstrapping -->
@@ -42,7 +52,6 @@
 <script src="{% static "config.route.js" %}"></script>
 <script src="{% static "controllers/controller2.js" %}"></script>
 <script src="{% static "controllers/controller4.js" %}"></script>
-<script src="{% static "controllers/dashboard.js" %}"></script>
 
 
 </body>

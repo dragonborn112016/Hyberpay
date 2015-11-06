@@ -8,13 +8,34 @@ from django.template.loader import get_template
 from HyberPay.Gmail_Access.getMails import *
 from HyberPay.forms import *
 from HyberPay.models import *
+from django.shortcuts import render_to_response, redirect, render
+from django.contrib.auth import logout as auth_logout
 
 
 # Create your views here.
 def main_page(request):
-    template = get_template('index.html')
-    output = template.render()
-    return HttpResponse(output);
+    username =  request.user
+    print username.username,":",type(username)
+    
+    if username.username =='':
+        print 'here'
+        context = RequestContext(request, {
+        'request': request, 'user': request.user})   
+        return render_to_response('index.html', context_instance=context)
+
+    user = User.objects.get_by_natural_key(username=username)
+    try:
+        ucm = UserContactModel.objects.get(user=user)
+    except Exception,error:
+        print "creating user contact model"
+        ucm  = UserContactModel()
+        ucm.user=user
+        ucm.contact_no ='unknown'
+        ucm.save()
+    context = RequestContext(request, {
+        'request': request, 'user': request.user})   
+    return render_to_response('index.html', context_instance=context)
+
 
 def portals_page(request,filename):
     fname ="/".join(['portals',filename]);
@@ -65,6 +86,8 @@ def registration_page(request):
                      }) 
         return render_to_response('registration/registration.html', variables)
 
+
+#for hyberpay
 def login_page(request):
     if request.method == 'POST':
         form = LoginForm(request.POST)
@@ -109,9 +132,20 @@ def login_page(request):
                      }) 
     return render_to_response('registration/login.html', variables)
 
+
+#for hyberpay
 def logout_page(request):
     logout(request)
     return HttpResponseRedirect('/')
+
+# for social apps
+def logout_social(request):
+    auth_logout(request)
+    return redirect('/')
+
+
+
 def tester(request):
     print "in here"
+    
     return HttpResponse('<html><body>in test</body></html>')
