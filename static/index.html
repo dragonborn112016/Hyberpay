@@ -14,7 +14,22 @@
     <link rel="stylesheet" href="{% static "bower_components/angular-material/angular-material.css" %}">
 
 </head>
-<body>
+<body >
+
+<div class="container-fluid" ng-controller="AppCtrl as vm" >
+
+			{% if user and not user.is_anonymous %}
+			
+				<input type="hidden" id = 'loggedin' name ='loggedin' value=true>
+				<div ng-init="vm.go('/home')">
+				<a>Hello, {{ user.get_full_name }}!
+				</a>
+				<br>
+				<a href="social/logout">Logout</a>
+			{% else %}
+				<a href="{% url 'social:begin' 'google-oauth2' %}?next={{ request.path }}">Login with google</a>
+			{% endif %}
+</div>
 
 <div ng-view></div>
 
@@ -29,28 +44,7 @@
 <script src="{% static "bower_components/bootstrap/dist/js/bootstrap.min.js" %}"></script>
 <script src="{% static "bower_components/angular-video-bg/angular-video-bg.js" %}"></script>
 
-<script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js">
-</script>
-<script src="https://apis.google.com/js/client:platform.js?onload=start" async defer>
-</script>
-<!-- END Pre-requisites --><script>
-    function start() {
 
-        gapi.load('auth2', function() {
-            auth2 = gapi.auth2.init({
-                client_id: '782274586213-91oe449116oq1704pbrs95tp2suc68lo.apps.googleusercontent.com',
-                fetch_basic_profile: true
-                // Scopes to request in addition to 'profile' and 'email'
-                //scope: 'additional_scope'
-            });
-
-
-
-        });
-
-
-    }
-</script>
 
 
 <!--bootstrapping -->
