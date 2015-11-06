@@ -14,24 +14,28 @@ from django.contrib.auth import logout as auth_logout
 
 # Create your views here.
 def main_page(request):
-    username =  request.user
-    print username.username,":",type(username)
-    
-    if username.username =='':
-        print 'here'
-        context = RequestContext(request, {
-        'request': request, 'user': request.user})   
-        return render_to_response('index.html', context_instance=context)
-
-    user = User.objects.get_by_natural_key(username=username)
     try:
-        ucm = UserContactModel.objects.get(user=user)
-    except Exception,error:
-        print "creating user contact model"
-        ucm  = UserContactModel()
-        ucm.user=user
-        ucm.contact_no ='unknown'
-        ucm.save()
+        username =  request.user
+        
+        if username.username =='':
+            print 'here'
+            context = RequestContext(request, {
+            'request': request, 'user': request.user})   
+            return render_to_response('index.html', context_instance=context)
+        else:
+            user = User.objects.get_by_natural_key(username=username)
+            try:
+                ucm = UserContactModel.objects.get(user=user)
+            except Exception,error:
+                print "creating user contact model"
+                ucm  = UserContactModel()
+                ucm.user=user
+                ucm.contact_no ='unknown'
+                ucm.save()
+                return HttpResponseRedirect('accounts/credential')
+    except:
+        print "exception"
+        
     context = RequestContext(request, {
         'request': request, 'user': request.user})   
     return render_to_response('index.html', context_instance=context)
@@ -147,5 +151,4 @@ def logout_social(request):
 
 def tester(request):
     print "in here"
-    
     return HttpResponse('<html><body>in test</body></html>')

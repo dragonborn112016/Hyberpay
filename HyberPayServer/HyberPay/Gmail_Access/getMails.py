@@ -51,12 +51,11 @@ def auth_return(request):
     credential = FLOW.step2_exchange(request.REQUEST)
     storage = Storage(CredentialsModel, 'id', request.user, 'credential')
     storage.put(credential)
-    return HttpResponseRedirect("accounts/profile")
+    return HttpResponseRedirect("accounts/credential")
 
-    
 
 @login_required
-def get_mailIds(request):
+def get_credentials(request):
     storage = Storage(CredentialsModel, 'id', request.user, 'credential')
     credential = storage.get()
     if credential is None or credential.invalid == True:
@@ -68,6 +67,14 @@ def get_mailIds(request):
             return HttpResponseRedirect(authorize_url)
         except :
             return HttpResponseRedirect('/')
+    return HttpResponseRedirect('/')    
+
+@login_required
+def get_mailIds(request):
+    storage = Storage(CredentialsModel, 'id', request.user, 'credential')
+    credential = storage.get()
+    if credential is None or credential.invalid == True:
+        return HttpResponseRedirect('accounts/credential')
     else:
         username = request.user
         user = UserContactModel.objects.get(user=username)
@@ -324,7 +331,8 @@ def fetchmails(service,timestamp):
     query="label:inbox ({+order +booking +booked +ticket +pnr +bill+invoice}"+" {+price +fare +amount} {+id +no})"
     if timestamp:
         query = query+" after:"+str(timestamp)
-    
+    else:
+        query = query+" newer_than:6m"
     mes = ListMessagesMatchingQuery(service, 'me', query)
     
     msglist=[];
