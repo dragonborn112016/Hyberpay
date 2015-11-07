@@ -152,6 +152,16 @@ def fetchAmount(dta):
                     if flag:
 ##                        print row
                         wrd1 = re.sub('^[a-z]*[^a-zA-Z0-9]*[a-z]*[^a-zA-Z0-9]*',"",wrd)
+                        wrd2 = re.findall('[a-z]*$',wrd1)
+                        if len(wrd2)>1:
+                            flag =False
+                            continue
+                        
+                        wrd2 = re.findall('^[a-z]+[0-9]*$',wrd)
+                        if len(wrd2)>1:
+                            flag =False
+                            continue
+                        
                         details.append(wrd1)
                         break
     
@@ -208,6 +218,54 @@ def fetchAmount(dta):
                 
                 if wrd in filter:
                     break
+                    
+                if (not lett.isalpha())and len(lett)>1:
+                    for w in lett:
+                        if w.isdigit():
+                            flag=True
+                            break
+
+                if flag:
+                    print row
+                    wrd1 = re.sub('^[a-z]*[^a-zA-Z0-9]*[a-z]*[^a-zA-Z0-9]*',"",wrd)
+                    wrd2 = re.findall('[a-z]*$',wrd1)
+                    if len(wrd2)>1:
+                        flag =False
+                        continue
+                    wrd2 = re.findall('^[a-z]+[0-9]*$',wrd)
+                    if len(wrd2)>=1:
+                        flag =False
+                        continue
+                    wrd2 = re.findall('[^a-z0-9/-]$',wrd)
+                    if len(wrd2)>=1:
+                        flag =False
+                        continue
+                    
+                    details.append(wrd1)
+                    break
+
+    if flag:
+        return details
+    
+    a=nltk.ngrams(dta1,5)
+
+    for row in a:
+        if flag:
+            break
+        if 'payment' in row[0]:
+            #print dta1
+            j=-1
+
+            for wrd in row:
+                j=j+1;
+                lett = str(wrd)
+                #===============================================================
+                # if j==3:
+                #     break
+                #===============================================================
+                
+                if wrd in filter:
+                    break
                 
                 if (not lett.isalpha())and len(lett)>1:
                     for w in lett:
@@ -218,9 +276,15 @@ def fetchAmount(dta):
                 if flag:
 ##                    print row
                     wrd1 = re.sub('^[a-z]*[^a-zA-Z0-9]*[a-z]*[^a-zA-Z0-9]*',"",wrd)
+                    wrd2 = re.findall('[a-z]*$',wrd1)
+                    if len(wrd2)>1:
+                        flag =False
+                        continue
+                    if len(wrd1)<2:
+                        flag = False
+                        continue
                     details.append(wrd1)
                     break
-
 
     return details
 ##    print details

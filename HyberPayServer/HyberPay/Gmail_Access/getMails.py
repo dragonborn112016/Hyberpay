@@ -7,7 +7,8 @@ from apiclient.discovery import build
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.http import HttpResponseRedirect
-from HyberPay.models import CredentialsModel, UserContactModel, UserMailsModel
+from HyberPay.models import CredentialsModel, UserContactModel, UserMailsModel,\
+    MailAttachmentModel
 from HyberPayServer import settings
 from oauth2client import xsrfutil
 from oauth2client.client import flow_from_clientsecrets
@@ -74,7 +75,7 @@ def get_mailIds(request):
     storage = Storage(CredentialsModel, 'id', request.user, 'credential')
     credential = storage.get()
     if credential is None or credential.invalid == True:
-        return HttpResponseRedirect('accounts/credential')
+        return HttpResponseRedirect('../../accounts/credential')
     else:
         username = request.user
         user = UserContactModel.objects.get(user=username)
@@ -258,7 +259,20 @@ def saveUserMails(usercontactmodel,mreaderlist):
         umm.timestamp = mreader.date
         umm.sender = mreader.sender
         umm.noOfFiles = mreader.no_of_files
+        umm.msgId = mreader.msgId
+        #print 'message id: ',mreader.msgId
         umm.save()
+        if mreader.no_of_files>0:
+            i=0;
+            att_id = mreader.att_id
+            for fname in mreader.filename:
+                mam = MailAttachmentModel()
+                mam.umm = umm
+                mam.fname = fname
+                mam.att_id = att_id[i]
+                i+=1
+                mam.save()
+        
 
 def getListfromdb(usercontactmodel):
     res = UserMailsModel.objects.filter(ucm=usercontactmodel)
@@ -266,13 +280,22 @@ def getListfromdb(usercontactmodel):
     mreaderlist=[]
     
     for umm in res:
+        mams = MailAttachmentModel.objects.filter(umm=umm)
+        filename= []
+        att_ids=[]
+        for mam in mams:
+            filename.append(mam.fname)
+            att_ids.append(mam.att_id)
         mreader= MessageReader()
+        mreader.filename=filename
         mreader.setDate(umm.timestamp)
         mreader.setHtml(umm.html_mail)
         mreader.setNoOfFiles(0)
         mreader.setSender(umm.sender)
         mreader.setText(umm.text_mail)
         mreader.setNoOfFiles(umm.noOfFiles)
+        mreader.setMsgId(umm.msgId)
+        mreader.setAtt_id(att_ids)
         mreaderlist.append(mreader)
         msglist.append(umm.html_mail)
     res = [msglist,mreaderlist]
@@ -304,6 +327,8 @@ def readparts(parts):
     
     mreader = MessageReader()
     cnt=0;
+    filename =[]
+    att_ids=[]
     for part in parts:
         try:
             mime = part['mimeType']
@@ -318,17 +343,26 @@ def readparts(parts):
                 subreader = readparts(subpart)
                 mreader.setHtml(subreader.html)
                 mreader.setText(subreader.text)
-            elif mime == "application/octet-stream":
+            if part['filename']:
                 cnt = cnt+1;
+                filename.append(part['filename'])
+                mreader.setFilename(filename)
                 mreader.setNoOfFiles(cnt)
+                att_ids.append(part['body']['attachmentId'])
+                mreader.setAtt_id(att_ids)
+
         except Exception,error:
             print "error occured reading mimeType %s" % error
-                
+    
+    #===========================================================================
+    # print "no of files :",mreader.no_of_files
+    # print "filenames :", mreader.filename
+    #===========================================================================
     return mreader
 
 def fetchmails(service,timestamp):
     
-    query="label:inbox ({+order +booking +booked +ticket +pnr +bill+invoice}"+" {+price +fare +amount} {+id +no})"
+    query="label:inbox ({+order +transaction +booking +booked +ticket +pnr +bill+invoice}"+" {+price +fare +amount} {+id +no})"
     if timestamp:
         query = query+" after:"+str(timestamp)
     else:
@@ -352,6 +386,7 @@ def fetchmails(service,timestamp):
             mparts =  message['payload']['parts']
             
             mreader = readparts(mparts)
+            mreader.setMsgId(msg['id'])
             
             
         except errors.HttpError, error:
@@ -360,6 +395,8 @@ def fetchmails(service,timestamp):
             #print 'An error occurred: %s' % error # parts not accessible
             mreader = MessageReader()
             mime = message['payload']['mimeType']
+            mreader.setMsgId(msg['id'])
+        
             if mime == "text/plain":
                 s = base64.urlsafe_b64decode(message['payload']['body']['data'].encode('ASCII'))  
                 mreader.setText(s)
@@ -421,11 +458,8 @@ def get_gmailData(msglist,mreaderlist):
             continue # create mapping also
         if not amt:
             amt=[""]
-        print "details :" ,details1
         mreader1 = mreaderlist[mapping[i]]
-        print "label :", mreader1.label
-        
-        
+                
         
         #=======================================================================
         # mappedCdata.append(data)
@@ -445,6 +479,12 @@ def get_gmailData(msglist,mreaderlist):
         sender =  str(mreader1.sender)
         jsondict['sender'] = sender
         jsondict['date']=dte
+        
+        dte1 = dte.split('/')
+        jsondict['d'] = dte1[0]
+        jsondict['m'] = dte1[1]
+        jsondict['y'] = dte1[2]
+        
         jsondict['ammount'] = amt[0]
         jsondict['label'] = mreader1.label
         i1=0
@@ -453,8 +493,17 @@ def get_gmailData(msglist,mreaderlist):
             jsondict[Iddetails[i1]] =Iddetails[j1]
             i1+=2
             j1+=2
-            
+        filedict = {'size':mreader1.no_of_files}
+        i1=0
+        for fname in mreader1.filename:
+            filedict[str(i1)]=fname
+            filedict[str(i1)+'id']=mreader1.att_id[i1]
+            i1+=1;
+        jsondict['files']=filedict   
+        jsondict['msgId']=mreader1.msgId
+        print "dictionary :", jsondict
         jsondict['html_content']=mreader1.html
+        
         #===================================================================
         # print type(sender)
         #===================================================================
@@ -475,3 +524,30 @@ def get_gmailData(msglist,mreaderlist):
     #===========================================================================
     print "data len :",len(jsonlist) 
     return jsonlist
+
+
+def GetAttachments(service, user_id, msg_id,att_id,filename, prefix=""):
+    """Get and store attachment from Message with given id.
+
+    Args:
+    service: Authorized Gmail API service instance.
+    user_id: User's email address. The special value "me"
+    can be used to indicate the authenticated user.
+    msg_id: ID of Message containing attachment.
+    prefix: prefix which is added to the attachment filename on saving
+    """
+    try:
+        #att_id=part['body']['attachmentId']
+        att=service.users().messages().attachments().get(userId=user_id, messageId=msg_id,id=att_id).execute()
+        data=att['data']
+        file_data = base64.urlsafe_b64decode(data.encode('UTF-8'))
+        path1 =os.path.join(prefix,filename) 
+
+        f= open(path1, 'wb')
+        f.write(file_data)
+        f.close()
+        print "write done :"
+        return path1
+    except Exception,err:
+        print "not written : %s" %err
+        return     

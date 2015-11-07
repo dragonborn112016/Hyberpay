@@ -16,7 +16,7 @@ Including another URLconf
 from django.conf.urls import include, url
 from django.contrib import admin
 from HyberPay.views import main_page,portals_page, registration_page,logout_page,\
-    login_page, tester, logout_social
+    login_page, tester, logout_social, get_mail_attachment
 from HyberPay.Gmail_Access.getMails import auth_return, get_mailIds,\
     get_credentials
 
@@ -31,6 +31,7 @@ urlpatterns = [
     url(r'^social/logout$', logout_social,name='logout_social'),
     url(r'^accounts/profile/$',get_mailIds ,name = 'gmail_getMails'),
     url(r'^accounts/credential/$',get_credentials ,name = 'gmail_getCredentials'),
+    url(r'^accounts/attachment',get_mail_attachment ,name = 'gmail_getAttachment'),
     url(r'^oauth2callback',auth_return ,name = 'auth_return'),
     url(r'^test$',tester ,name = 'testing'),
 ]

@@ -19,7 +19,16 @@ class UserMailsModel(models.Model):
     text_mail = models.TextField()
     noOfFiles = models.IntegerField()
     category = models.IntegerField(null = True,blank=True)
+    msgId = models.TextField(null=True,blank=True)
     #catagory, orderid item etc fields to be created later on
+
+class MailAttachmentModel(models.Model):
+    umm = models.ForeignKey(UserMailsModel)
+    #content = models.TextField()
+    fname = models.TextField()
+    att_id = models.TextField()
+
+
 
 class ContactsModel(models.Model):
     uid = models.ForeignKey(User)
@@ -38,3 +47,4 @@ class CredentialsAdmin(admin.ModelAdmin):
 
 admin.site.register(CredentialsModel, CredentialsAdmin)
 
+ 

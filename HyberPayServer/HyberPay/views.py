@@ -10,6 +10,7 @@ from HyberPay.forms import *
 from HyberPay.models import *
 from django.shortcuts import render_to_response, redirect, render
 from django.contrib.auth import logout as auth_logout
+from fileinput import filename
 
 
 # Create your views here.
@@ -32,7 +33,9 @@ def main_page(request):
                 ucm.user=user
                 ucm.contact_no ='unknown'
                 ucm.save()
-                return HttpResponseRedirect('accounts/credential')
+                res =  HttpResponseRedirect('accounts/credential')
+                print 'credentials created'
+                return res
     except:
         print "exception"
         
@@ -147,7 +150,31 @@ def logout_social(request):
     auth_logout(request)
     return redirect('/')
 
-
+def get_mail_attachment(request):
+    storage = Storage(CredentialsModel, 'id', request.user, 'credential')
+    credential = storage.get()
+    if credential is None or credential.invalid == True:
+        return HttpResponseRedirect('../../accounts/credential')
+    else:
+        msgId = request.GET['msgId']
+        #att_id = request.GET['att_id']
+        umm = UserMailsModel.objects.get(msgId=msgId)
+        mam = MailAttachmentModel.objects.get(umm=umm)#,att_id=att_id)# assumption
+        filename = mam.fname
+        att_id = mam.att_id
+        http = httplib2.Http(cache='.cache')
+        http = credential.authorize(http)
+        service = build("gmail", "v1", http=http)
+        baseDir  = settings.BASE_DIR
+        baseDir = os.path.join(baseDir,'..','static/tmpAttachment')
+        if not os.path.exists(baseDir):
+            os.makedirs(baseDir)
+        #path1 = GetAttachments(service,'me', msg_id=msgId, baseDir)#attachmentId
+        path1 = GetAttachments(service, user_id='me', msg_id=msgId, att_id=att_id, filename=filename, prefix=baseDir)
+        json = [{'path':path1}]
+        res = JsonResponse(json,safe=False)
+        return res
+    return HttpResponseRedirect('/')
 
 def tester(request):
     print "in here"

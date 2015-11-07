@@ -75,7 +75,7 @@ TEMPLATES = [
 
 AUTHENTICATION_BACKENDS = (
     'social.backends.google.GoogleOAuth2',
-    'social_auth.backends.google.GoogleOAuth2Backend',
+    #'social_auth.backends.google.GoogleOAuth2Backend',
     'django.contrib.auth.backends.ModelBackend',
 )   
 WSGI_APPLICATION = 'HyberPayServer.wsgi.application'
