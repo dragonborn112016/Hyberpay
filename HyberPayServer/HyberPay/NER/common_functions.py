@@ -43,8 +43,7 @@ def viterbiGLM(glm,sentence):
 
     def dot_product(v,g):
         ''' dot product of two vectors'''
-        val = sum((v.get(k,0.0) for k,val in g.iteritems()))
-        return val
+        return sum((v.get(k,0.0) for k,val in g.iteritems()))
         
 
     # the viterbi algo
@@ -71,7 +70,7 @@ def viterbiGLM(glm,sentence):
     for k in xrange(n-2,0,-1):
         y[k] = bp[k+2,y[k+1],y[k+2]]
     y[0] = '*'
-    scores = [pi[i,y[i-1],y[i]]for i in range(1,n)]
+    scores = [pi[i,y[i-1],y[i]]for i in xrange(1,n)]
 
     return y[1:n+1],scores+[score]
 
@@ -161,23 +160,11 @@ def print_tags(sentence, tagging,glm):
     return "\n".join([w + " "+ t for w,t in zip(sentence, tagging) if t !='O'])
         
 
-def ner(sentence_file,Tag_file,glm):
-    #glm = GLM()
-    glm.decode(open(Tag_file))
-
-    #for sentence in read_sentences(open(sentence_file)):
+def ner(sentence_file,glm):
+    ''' named entity recognizer '''
     sentence = sentence_file.split()
     tagging,scores = viterbiGLM(glm,sentence)
     return print_tags(sentence ,tagging,glm)
-#===============================================================================
-# ##        sys.stderr.write("scores %s" %sentence)
-#     if first_sen:
-#         output.write("\n\n%s" %print_tags(sentence ,tagging))
-#     else :
-#         output.write(print_tags(sentence ,tagging))
-# 
-#     first_sen=True
-#===============================================================================
 
 
 def read_train(handle):

@@ -313,11 +313,8 @@ def get_gmailData(msglist,mreaderlist):
     #===========================================================================
     
     jsonlist = []
-    print "precomputing"
     precompute = ClassificationPreComputing()
-    print "precomputing done"
     
-    print "classifying :"
     i=-1
     for data in fdata:
         i+=1
@@ -330,6 +327,25 @@ def get_gmailData(msglist,mreaderlist):
     i=-1
     print "len of filererd data :",len(fdata)
     
+    others_glm = GLM()
+    utility_glm = utility_bills.GLM()
+    doa_travel_glm = doa_travel.GLM()
+    dod_travel_glm = dod_travel.GLM()
+    toa_travel_glm = toa_travel.GLM()
+    tod_travel_glm = tod_travel.GLM()
+    deploc_travel_glm = deploc_travel.GLM()
+    arvloc_travel_glm = arvloc_travel.GLM()
+    
+    others_glm.decode(open(OTHERS_MODEL))
+    utility_glm.decode(open(UTILITY_MODEL))
+    doa_travel_glm.decode(open(DOA_MODEL))
+    dod_travel_glm.decode(open(DOD_MODEL))
+    toa_travel_glm.decode(open(TOA_MODEL))
+    tod_travel_glm.decode(open(TOD_MODEL))
+    deploc_travel_glm.decode(open(DEPLOC_MODEL))
+    arvloc_travel_glm.decode(open(ARVLOC_MODEL))
+    
+    
     for data in fdata:
         i=i+1;
         jsondict = {}
@@ -341,33 +357,6 @@ def get_gmailData(msglist,mreaderlist):
         
         
         # replace after if statement
-        mreader1 = mreaderlist[mapping[i]]
-        if mreader1.label == 'others':
-            nertags = ner(data, OTHERS_MODEL, GLM())
-            jsondict.update(fetch_nertag_item(nertags))
-        
-        elif mreader1.label == 'utility':
-            nertags = ner(data, UTILITY_MODEL, utility_bills.GLM())
-            jsondict.update(fetch_nertag(nertags))
-        
-        elif mreader1.label == 'travel':
-            nertags = ner(data, DOA_MODEL, doa_travel.GLM())
-            jsondict.update(fetch_nertag(nertags))
-            
-            nertags = ner(data, DOD_MODEL, dod_travel.GLM())
-            jsondict.update(fetch_nertag(nertags))
-            
-            nertags = ner(data, TOA_MODEL, toa_travel.GLM())
-            jsondict.update(fetch_nertag(nertags))
-            
-            nertags = ner(data, TOD_MODEL, tod_travel.GLM())
-            jsondict.update(fetch_nertag(nertags))
-            
-            nertags = ner(data, DEPLOC_MODEL, deploc_travel.GLM())
-            jsondict.update(fetch_nertag(nertags))
-            
-            nertags = ner(data, ARVLOC_MODEL, arvloc_travel.GLM())
-            jsondict.update(fetch_nertag(nertags))
         
         
         #################################
@@ -376,22 +365,9 @@ def get_gmailData(msglist,mreaderlist):
         if not amt:
             amt=[""]
                 
-        
-        #=======================================================================
-        # mappedCdata.append(data)
-        # mappedHtmlData.append(msglist[mapping[i]])
-        #=======================================================================
-        
-        #=======================================================================
-        # details1.append("date")
-        #=======================================================================
+        mreader1 = mreaderlist[mapping[i]]
         date  = mreader1.date
         dte = time.strftime('%d/%m/%Y',  time.gmtime(int(date)/1000))
-        #datetime.datetime.fromtimestamp(int(date)).strftime('%Y-%m-%d %H:%M:%S')
-        #=======================================================================
-        # details1.append(dte)
-        # details1.append("sender")
-        #=======================================================================
         sender =  str(mreader1.sender)
         jsondict['sender'] = sender
         jsondict['date']=dte
@@ -403,6 +379,35 @@ def get_gmailData(msglist,mreaderlist):
         
         jsondict['ammount'] = amt[0]
         jsondict['label'] = mreader1.label
+        
+        
+        if mreader1.label == 'others':
+            nertags = ner(data, others_glm)
+            jsondict.update(fetch_nertag_item(nertags))
+        
+        elif mreader1.label == 'utility':
+            nertags = ner(data, utility_glm)
+            jsondict.update(fetch_nertag(nertags))
+        
+        elif mreader1.label == 'travel':
+            nertags = ner(data, doa_travel_glm)
+            jsondict.update(fetch_nertag(nertags))
+            
+            nertags = ner(data, dod_travel_glm)
+            jsondict.update(fetch_nertag(nertags))
+            
+            nertags = ner(data, toa_travel_glm)
+            jsondict.update(fetch_nertag(nertags))
+            
+            nertags = ner(data, tod_travel_glm)
+            jsondict.update(fetch_nertag(nertags))
+            
+            nertags = ner(data, deploc_travel_glm)
+            jsondict.update(fetch_nertag(nertags))
+            
+            nertags = ner(data, arvloc_travel_glm)
+            jsondict.update(fetch_nertag(nertags))
+        
         
             #print 'dictionary : ',jsondict
         i1=0
@@ -417,29 +422,14 @@ def get_gmailData(msglist,mreaderlist):
             filedict[str(i1)]=fname
             filedict[str(i1)+'id']=mreader1.att_id[i1]
             i1+=1;
+            
         jsondict['files']=filedict   
         jsondict['msgId']=mreader1.msgId
         #print "dictionary :", jsondict
         jsondict['html_content']=mreader1.html
         
-        #===================================================================
-        # print type(sender)
-        #===================================================================
-        #=======================================================================
-        # details1.append(sender)
-        # details1 = " ".join(details1)
-        # det.append(details1)
-        #=======================================================================
         jsonlist.append(jsondict)
     
-    #=======================================================================
-    # print jsonlist
-    #=======================================================================
-    #===========================================================================
-    # print "det :",len(det)
-    # print "mappedhtml :",len(mappedHtmlData)
-    # print "mapped cdata :",len(mappedCdata)
-    #===========================================================================
     print "data len :",len(jsonlist) 
     return jsonlist
 
