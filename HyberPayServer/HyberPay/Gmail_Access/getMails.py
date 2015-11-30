@@ -16,13 +16,21 @@ from oauth2client.django_orm import Storage
 from HyberPay.Gmail_Access.messageReader import MessageReader
 import base64
 from HyberPay.DataProcessing.CleanData import filteredData
-from HyberPay.DataProcessing.getIdDetaills import fetchIdDetails, fetchAmount
+from HyberPay.DataProcessing.getIdDetaills import fetchIdDetails, fetchAmount,\
+    fetch_nertag, fetch_nertag_item
 from django.http.response import JsonResponse
 import time
 from HyberPay.DataProcessing.readWriteFiles import writetofiles, readfiles
 from django.db.models import Max
 from HyberPay.Classification.traindata import ClassificationPreComputing, getCategory
 from HyberPay.Classification.classifydata import classifycleanfiles
+from django.shortcuts import render_to_response
+from django.template.context import RequestContext
+from HyberPay.NER.common_functions import ner, OTHERS_MODEL, UTILITY_MODEL,\
+    DOA_MODEL, DOD_MODEL, TOA_MODEL, TOD_MODEL, DEPLOC_MODEL, ARVLOC_MODEL
+from HyberPay.NER.item_name import GLM
+from HyberPay.NER import utility_bills, doa_travel, dod_travel, toa_travel,\
+    tod_travel, deploc_travel, arvloc_travel
 
 CLIENT_SECRETS = os.path.join(os.path.dirname(__file__),'client_secret.json')
 
@@ -52,7 +60,7 @@ def auth_return(request):
     credential = FLOW.step2_exchange(request.REQUEST)
     storage = Storage(CredentialsModel, 'id', request.user, 'credential')
     storage.put(credential)
-    return HttpResponseRedirect("accounts/credential")
+    return get_credentials(request)
 
 
 @login_required
@@ -62,20 +70,26 @@ def get_credentials(request):
     if credential is None or credential.invalid == True:
         FLOW.params['state'] = xsrfutil.generate_token(settings.SECRET_KEY,
                                                        request.user)
-        print FLOW.params['state']
+        #print FLOW.params['state']
         try:
             authorize_url = FLOW.step1_get_authorize_url()
+            print 'authorizing user :',authorize_url
             return HttpResponseRedirect(authorize_url)
         except :
+            print 'credentials exception'
             return HttpResponseRedirect('/')
-    return HttpResponseRedirect('/')    
+    
+    context = RequestContext(request, {
+        'request': request, 'user': request.user})   
+    return render_to_response('index.html', context_instance=context)
+    #return HttpResponseRedirect('/')    
 
 @login_required
 def get_mailIds(request):
     storage = Storage(CredentialsModel, 'id', request.user, 'credential')
     credential = storage.get()
     if credential is None or credential.invalid == True:
-        return HttpResponseRedirect('../../accounts/credential')
+        return ''#HttpResponseRedirect('../../accounts/credential')
     else:
         username = request.user
         user = UserContactModel.objects.get(user=username)
@@ -114,136 +128,6 @@ def get_mailIds(request):
         response  = HttpResponse()
         response = JsonResponse(jsonlist,safe=False)    
         return response
-        #=======================================================================
-        # return render_to_response('registration/welcome.html', {# to be removed in future-sidharth
-        #             'messages': clus1,
-        #             'clust1':det,
-        #             'clust2':mappedHtmlData,
-        #             'clust3':mappedCdata
-        #             })
-        #=======================================================================
-
-        #=======================================================================
-        # cdata = filteredData(msglist)
-        # writetofiles(cdata, 'rawdata')    
-        # return render_to_response('registration/welcome.html', {# to be removed in future-sidharth
-        #         'messages': mes,
-        #         'messageInHtml':cdata,
-        #         'count':len(msglist),
-        #         })
-        #         
-        #=======================================================================
-            
-#===============================================================================
-#         ####################################################################################################
-#         # think about threading
-#         
-#         cdata = filteredData(msglist,True)
-#         a2 = dataProcessing(cdata)
-#         cdata1 = cleanfiles(msglist)
-#         print "clusteres processing"
-#         clus1 = [cdata1[i] for i in a2[0][1]]
-#         clus2 = [cdata1[i] for i in a2[1][1]]
-#         clus3 = [cdata1[i] for i in a2[2][1]]
-#         clus4 = [cdata1[i] for i in a2[3][1]]
-#         #clus3 =clus3 + [" new cluster started"] +clus4
-#         i=0
-#         det1 = []
-#         for data in clus1:
-#             try:
-#                 d  = data.encode("unicode-escape")
-#                 details1 = fetchIdDetails(d)
-#                 details1.append('total')
-#                 details1 = details1+fetchAmount(d)
-#             except Exception, error :
-#                 details1 = []
-#                 print "cluster 1 : error %s" %error 
-#                 continue
-#             details1 = " ".join(details1)
-#             det1.append(details1)
-#             i=i+1;
-#         
-#         
-#         print "done clus1"
-#         i=0
-#         det2 = []
-#         for data in clus2:
-#             try:
-#                 d  = data.encode("unicode-escape")
-#                 details2 = fetchIdDetails(d)
-#                 details2.append('total')
-#                 details2 = details2+fetchAmount(d)
-#             except Exception,error:
-#                 details2=[]
-#                 d  = data.encode("unicode-escape")
-#                 print "cluster 2: %s" %error
-#                 continue
-#             details2 =" ".join(details2)
-#             det2.append(details2)
-#             i=i+1;
-#         
-#         i=0
-#         det3 = []
-#         for data in clus3:
-#             try:
-#                 d  = data.encode("unicode-escape")
-#                 details3 = fetchIdDetails(d)
-#                 details3.append('total')
-#                 details3 = details3+fetchAmount(d)
-#             except Exception,error:
-#                 details3=[]
-#                 
-#                 print "cluster 3: %s" %error
-#                 continue
-#             details3 =" ".join(details3)
-#             det3.append(details3)
-#             i=i+1;
-#         
-#         i=0
-#         det4 = []
-#         for data in clus4:
-#             try:
-#                 d  = data.encode("unicode-escape")
-#                 details4 = fetchIdDetails(d)
-#                 details4.append('total')
-#                 details4 = details4+fetchAmount(d)
-#             except Exception,error:
-#                 details4=[]
-#                 d  = data.encode("unicode-escape")
-#                 print "cluster 4: %s " %error
-#                 continue
-#             details4=" ".join(details4) 
-#             det4.append(details4)
-#             
-#             i=i+1;
-#         
-#         clus1 = [msglist[i] for i in a2[0][1]]
-#         clus2 = [msglist[i] for i in a2[1][1]]
-#         clus3 = [msglist[i] for i in a2[2][1]]
-#         clus4 = [msglist[i] for i in a2[3][1]]
-# 
-#         # process and clean data 
-#         
-#         ####################################################################################################
-#         return render_to_response('registration/welcome.html', {# to be removed in future-sidharth
-#                     'messages': mes,
-#                     'messageInHtml':msglist,
-#                     'cluster1':clus1,
-#                     'cluster2':clus2,
-#                     'cluster3':clus3,
-#                     'cluster4':clus4,
-#                     'count':len(cdata),
-#                     'details1':det1,
-#                     'details2':det2,
-#                     'details3':det3,
-#                     'details4':det4,
-#                     'len1':len(det1),
-#                     'len2':len(det2),
-#                     'len3':len(det3),
-#                     'len4':len(det4)
-#                     })
-#         
-#===============================================================================
 
 def saveUserMails(usercontactmodel,mreaderlist):
     
@@ -454,11 +338,43 @@ def get_gmailData(msglist,mreaderlist):
         details1.append('total')
         amt = fetchAmount(data)
         details1 = details1+amt
+        
+        
+        # replace after if statement
+        mreader1 = mreaderlist[mapping[i]]
+        if mreader1.label == 'others':
+            nertags = ner(data, OTHERS_MODEL, GLM())
+            jsondict.update(fetch_nertag_item(nertags))
+        
+        elif mreader1.label == 'utility':
+            nertags = ner(data, UTILITY_MODEL, utility_bills.GLM())
+            jsondict.update(fetch_nertag(nertags))
+        
+        elif mreader1.label == 'travel':
+            nertags = ner(data, DOA_MODEL, doa_travel.GLM())
+            jsondict.update(fetch_nertag(nertags))
+            
+            nertags = ner(data, DOD_MODEL, dod_travel.GLM())
+            jsondict.update(fetch_nertag(nertags))
+            
+            nertags = ner(data, TOA_MODEL, toa_travel.GLM())
+            jsondict.update(fetch_nertag(nertags))
+            
+            nertags = ner(data, TOD_MODEL, tod_travel.GLM())
+            jsondict.update(fetch_nertag(nertags))
+            
+            nertags = ner(data, DEPLOC_MODEL, deploc_travel.GLM())
+            jsondict.update(fetch_nertag(nertags))
+            
+            nertags = ner(data, ARVLOC_MODEL, arvloc_travel.GLM())
+            jsondict.update(fetch_nertag(nertags))
+        
+        
+        #################################
         if len(details1)<4:
             continue # create mapping also
         if not amt:
             amt=[""]
-        mreader1 = mreaderlist[mapping[i]]
                 
         
         #=======================================================================
@@ -487,6 +403,8 @@ def get_gmailData(msglist,mreaderlist):
         
         jsondict['ammount'] = amt[0]
         jsondict['label'] = mreader1.label
+        
+            #print 'dictionary : ',jsondict
         i1=0
         j1=1
         while j1 <len(Iddetails):
@@ -501,7 +419,7 @@ def get_gmailData(msglist,mreaderlist):
             i1+=1;
         jsondict['files']=filedict   
         jsondict['msgId']=mreader1.msgId
-        print "dictionary :", jsondict
+        #print "dictionary :", jsondict
         jsondict['html_content']=mreader1.html
         
         #===================================================================

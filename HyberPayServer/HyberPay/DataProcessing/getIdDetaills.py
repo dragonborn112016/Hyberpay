@@ -5,14 +5,7 @@ Created on Oct 27, 2015
 '''
 
 import nltk
-import os
 import re
-from nltk.corpus import stopwords
-from nltk import FreqDist
-from django.shortcuts import render_to_response
-from HyberPay.DataProcessing.mainfun import dataProcessing
-from HyberPay.DataProcessing.CleanData import filteredData
-from HyberPay.DataProcessing.readWriteFiles import readfiles
 
 ORDER_VOCAB = ('order','ticket','pnr','payment','paisapay','transaction','bill','payment','booking','reference')
 
@@ -27,7 +20,7 @@ def getbigram(dta):
         for wrd in keywords:
             if wrd in dt:
                 ele =ele+dt
-                print dt
+                #print dt
                 break
     return ele
 
@@ -226,7 +219,7 @@ def fetchAmount(dta):
                             break
 
                 if flag:
-                    print row
+                    #print row
                     wrd1 = re.sub('^[a-z]*[^a-zA-Z0-9]*[a-z]*[^a-zA-Z0-9]*',"",wrd)
                     wrd2 = re.findall('[a-z]*$',wrd1)
                     if len(wrd2)>1:
@@ -288,3 +281,117 @@ def fetchAmount(dta):
 
     return details
 ##    print details
+
+
+
+
+def fetch_nertag(nertag):
+    if nertag.strip()=='' or nertag.strip()== None:
+        return {}
+    
+    res = {}
+    prevwt = ['']
+    iname = ''
+    tag =[]
+    
+    
+    for wt in nertag.split('\n'):
+        same_flag = False
+        if res.has_key(wt):
+            continue
+        for k,v in res.iteritems():
+            if k.startswith(wt[:5]):
+                same_flag = True
+                break
+        if same_flag:
+            continue
+        res[wt]=1
+        tag.append(wt)
+    
+    res = {}
+    flagtag = False
+    for wt in tag:
+        w = wt.split()
+        if prevwt[-1] == w[-1]:
+            if flagtag:
+                iname += ' '+w[0]
+                #print 'iname :',iname
+            else:
+                flagtag = True
+                iname =  prevwt[0] + " " + w[0]
+        else :
+            #print 'else',iname , flagtag
+            if flagtag:
+                flagtag = False
+                res[prevwt[-1]] = iname
+                iname = ''
+            if prevwt[-1]!='':
+                res[prevwt[-1]] = prevwt[0]
+        
+        prevwt = w
+    
+    if flagtag:
+        res[prevwt[-1]] = iname
+    else :
+        res[prevwt[-1]] = prevwt[0]
+        
+    print res            
+    return res
+
+
+def fetch_nertag_item(nertag):
+    if nertag.strip()=='' or nertag.strip()== None:
+        return {}
+
+    res = {}
+    prevwt = ['']
+    iname = ''
+    tag =[]
+    
+    
+    for wt in nertag.split('\n'):
+        same_flag = False
+        if res.has_key(wt):
+            continue
+        for k,v in res.iteritems():
+            if k.startswith(wt[:5]):
+                same_flag = True
+                break
+        if same_flag:
+            continue
+        res[wt]=1
+        w = wt.split()
+        if w[-1]=='S-ITEM':
+            w[-1] = 'ITEM'
+        tag.append(" ".join(w))
+    
+    res = {}
+    flagtag = False
+    for wt in tag:
+        w = wt.split()
+        if prevwt[-1] == w[-1]:
+            if flagtag:
+                iname += ' '+w[0]
+                #print 'iname :',iname
+            else:
+                flagtag = True
+                iname =  prevwt[0] + " " + w[0]
+        else :
+            #print 'else',iname , flagtag
+            if flagtag:
+                flagtag = False
+                res[prevwt[-1]] = iname
+                iname = ''
+            if prevwt[-1]!='':
+                res[prevwt[-1]] = prevwt[0]
+        
+        prevwt = w
+    
+    if flagtag:
+        res[prevwt[-1]] = iname
+    else :
+        res[prevwt[-1]] = prevwt[0]
+    
+    print res
+                    
+    return res

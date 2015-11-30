@@ -19,7 +19,6 @@ def main_page(request):
         username =  request.user
         
         if username.username =='':
-            print 'here'
             context = RequestContext(request, {
             'request': request, 'user': request.user})   
             return render_to_response('index.html', context_instance=context)
@@ -27,18 +26,21 @@ def main_page(request):
             user = User.objects.get_by_natural_key(username=username)
             try:
                 ucm = UserContactModel.objects.get(user=user)
+                print 'revisited'
             except Exception,error:
                 print "creating user contact model"
                 ucm  = UserContactModel()
                 ucm.user=user
                 ucm.contact_no ='unknown'
                 ucm.save()
-                res =  HttpResponseRedirect('accounts/credential')
-                print 'credentials created'
+            finally:
+                res =  get_credentials(request)
+                print 'credentials created : '
                 return res
     except:
         print "exception"
-        
+    
+    print 'redirecting'
     context = RequestContext(request, {
         'request': request, 'user': request.user})   
     return render_to_response('index.html', context_instance=context)

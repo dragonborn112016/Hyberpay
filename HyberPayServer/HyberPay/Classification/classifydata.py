@@ -9,7 +9,9 @@ import re
 from bs4 import BeautifulSoup             
 from HyberPay.DataProcessing.readWriteFiles import writetofiles, readfiles
 import django
-django.setup()
+from HyberPay.Classification.category import category
+#from HyberPay.Classification.traindata import ClassificationPreComputing , getCategory
+#django.setup()
 
 def classifycleanfiles(doc,ripSpChr=False):
     
@@ -116,27 +118,31 @@ def TestClassification():
         label = raw_input()
         i+=1
 
+
+def rem_spch(X):
+    ''' remove non alphabetic charachters from dataset'''
+    X0 = [re.sub('[^a-zA-Z]',' ',x) for x in X]
+    return X0
+
 def getXY():
+    ''' returns the training data set X is doc and Y is its class'''
+   
+    X0= rem_spch(readfiles('Classification/train data/negetive'))
+    Y0 = ['0']*len(X0)
     
-    umms = UserMailsModel.objects.all()
-    X = []
-    Y = []
-    i=0
-    
-    cat = ['0','1','2','3','4']
-    for umm in umms:
-        x = umm.text_mail
-        if str(umm.category) not in cat:
-            continue
-            
-        if x.strip() :
-            
-            X.append(x)
-            Y.append(umm.category)
-        i+=1
-    print "getXY() :",len(X)
-    res =[X,Y]
-    return res
+    X1 = rem_spch(readfiles('Classification/train data/others'))
+    Y1 = ['1']*len(X1)
+
+    X2= rem_spch(readfiles('Classification/train data/utility'))
+    Y2 = ['2']*len(X2)
+
+    X3= rem_spch(readfiles('Classification/train data/travel'))
+    Y3 = ['3']*len(X3)
+
+    X = X0 + X1 + X2 + X3
+    Y = Y0 + Y1 + Y2 + Y3
+    return X,Y
+
 
 def redoTextMailsDB():
     umms = UserMailsModel.objects.all()
