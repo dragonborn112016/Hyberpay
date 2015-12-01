@@ -89,7 +89,7 @@ def get_mailIds(request):
     storage = Storage(CredentialsModel, 'id', request.user, 'credential')
     credential = storage.get()
     if credential is None or credential.invalid == True:
-        return ''#HttpResponseRedirect('../../accounts/credential')
+        return HttpResponseRedirect('/')
     else:
         username = request.user
         user = UserContactModel.objects.get(user=username)
@@ -298,6 +298,7 @@ def fetchmails(service,timestamp):
 
 def get_gmailData(msglist,mreaderlist):
     
+    tot_time = time.time()
     #===========================================================================
     # det=[]
     #===========================================================================
@@ -324,7 +325,7 @@ def get_gmailData(msglist,mreaderlist):
         mreaderlist[mapping[i]] = mreader1
     print "done classification"
     
-    i=-1
+    
     print "len of filererd data :",len(fdata)
     
     others_glm = GLM()
@@ -345,10 +346,26 @@ def get_gmailData(msglist,mreaderlist):
     deploc_travel_glm.decode(open(DEPLOC_MODEL))
     arvloc_travel_glm.decode(open(ARVLOC_MODEL))
     
+    others_glm.V.setdefault(0.0)
+    utility_glm.V.setdefault(0.0)
+    doa_travel_glm.V.setdefault(0.0)
+    dod_travel_glm.V.setdefault(0.0)
+    toa_travel_glm.V.setdefault(0.0)
+    tod_travel_glm.V.setdefault(0.0)
+    deploc_travel_glm.V.setdefault(0.0)
+    arvloc_travel_glm.V.setdefault(0.0)
     
+    i=-1
+    tot_labels = ['others','travel','utility']
     for data in fdata:
+        
         i=i+1;
+        mreader1 = mreaderlist[mapping[i]]
+        if (mreader1.label not in tot_labels):
+            #print mreader1.label
+            continue
         jsondict = {}
+        
         Iddetails = fetchIdDetails(data)
         details1 = Iddetails
         details1.append('total')
@@ -365,7 +382,7 @@ def get_gmailData(msglist,mreaderlist):
         if not amt:
             amt=[""]
                 
-        mreader1 = mreaderlist[mapping[i]]
+        
         date  = mreader1.date
         dte = time.strftime('%d/%m/%Y',  time.gmtime(int(date)/1000))
         sender =  str(mreader1.sender)
@@ -380,14 +397,17 @@ def get_gmailData(msglist,mreaderlist):
         jsondict['ammount'] = amt[0]
         jsondict['label'] = mreader1.label
         
-        
+        strt_time = time.time()
         if mreader1.label == 'others':
+            
             nertags = ner(data, others_glm)
             jsondict.update(fetch_nertag_item(nertags))
+            print 'time taken for others :',time.time()-strt_time
         
         elif mreader1.label == 'utility':
             nertags = ner(data, utility_glm)
             jsondict.update(fetch_nertag(nertags))
+            print 'time taken for utility :',time.time()-strt_time
         
         elif mreader1.label == 'travel':
             nertags = ner(data, doa_travel_glm)
@@ -407,9 +427,11 @@ def get_gmailData(msglist,mreaderlist):
             
             nertags = ner(data, arvloc_travel_glm)
             jsondict.update(fetch_nertag(nertags))
+            
+            print 'time taken for travel :',time.time()-strt_time
         
         
-            #print 'dictionary : ',jsondict
+        #print 'dictionary : ',jsondict
         i1=0
         j1=1
         while j1 <len(Iddetails):
@@ -431,6 +453,7 @@ def get_gmailData(msglist,mreaderlist):
         jsonlist.append(jsondict)
     
     print "data len :",len(jsonlist) 
+    print 'total time taken :',time.time()-tot_time
     return jsonlist
 
 

@@ -28,7 +28,7 @@ def argmax(ls):
 def viterbiGLM(glm,sentence):
     ''' x is sentence, find the tags for sentence'''
     n = len(sentence)
-    
+    #print 'len of mail :',n
     # the tag sets
     def K(k):
         if k in (-1,0):
@@ -43,7 +43,11 @@ def viterbiGLM(glm,sentence):
 
     def dot_product(v,g):
         ''' dot product of two vectors'''
-        return sum((v.get(k,0.0) for k,val in g.iteritems()))
+        dp = 0
+        for k in g.keys():
+            if k in v:
+                dp +=1
+        return dp
         
 
     # the viterbi algo
@@ -70,9 +74,9 @@ def viterbiGLM(glm,sentence):
     for k in xrange(n-2,0,-1):
         y[k] = bp[k+2,y[k+1],y[k+2]]
     y[0] = '*'
-    scores = [pi[i,y[i-1],y[i]]for i in xrange(1,n)]
+    #scores = [pi[i,y[i-1],y[i]]for i in xrange(1,n)]
 
-    return y[1:n+1],scores+[score]
+    return y[1:n+1]#,scores+[score]
 
 
 def gen_fea_vec(glm,tagseq,sentence):
@@ -163,7 +167,8 @@ def print_tags(sentence, tagging,glm):
 def ner(sentence_file,glm):
     ''' named entity recognizer '''
     sentence = sentence_file.split()
-    tagging,scores = viterbiGLM(glm,sentence)
+    #tagging,scores = viterbiGLM(glm,sentence)
+    tagging = viterbiGLM(glm,sentence)
     return print_tags(sentence ,tagging,glm)
 
 

@@ -45,12 +45,14 @@ def fetchIdDetails(dta):
     dta1 = splitAndRemSp(dta)
                         
     a=nltk.ngrams(dta1,5)
-    keywords =['bill','order','booking','ticket','pnr','transaction','date',
-               'arrival','departure','price','total','ammount','amount','amt','fare','invoice']
+    #===========================================================================
+    # keywords =['bill','order','booking','ticket','pnr','transaction','date',
+    #            'arrival','departure','price','total','ammount','amount','amt','fare','invoice']
+    #===========================================================================
     nos = ['no','no.','no:','no.-','no:-','id','id.','id:','id.-','id:-']
     details=[]
     acquired=[]
-    found = False
+    #found = False
     for row in a:
             if row[1] in nos:
                 j=0
@@ -89,7 +91,7 @@ def fetchIdDetails(dta):
 
 ##        print "in here"
         for row in a:
-            word1 = str(row[0])
+            #word1 = str(row[0])
             if row[0] in ORDER_VOCAB:
 ##                print row
                 for wrd in row:
@@ -120,7 +122,7 @@ def fetchAmount(dta):
     dta1 = splitAndRemSp(dta)
     a=nltk.ngrams(dta1,5)
     keywords =['subtotal','fare','amount','paid']
-    filter = ['distance']
+    filter_wrd = ['distance']
     details = []
     flag=False
     
@@ -189,7 +191,7 @@ def fetchAmount(dta):
     if flag:
         return details
     
-    a=nltk.ngrams(dta1,5)
+    a=nltk.ngrams(dta1,6)
 
     for row in a:
         if flag:
@@ -209,7 +211,7 @@ def fetchAmount(dta):
                     continue
 
                 
-                if wrd in filter:
+                if wrd in filter_wrd:
                     break
                     
                 if (not lett.isalpha())and len(lett)>1:
@@ -234,6 +236,45 @@ def fetchAmount(dta):
                         flag =False
                         continue
                     
+                    ###################################################
+                    # check if next word in succession is also a no that is likely a price
+                    # if next word is more likely than first than do likewise
+                    ###################################################
+                    
+                    nflag=False
+                    if j+1<len(row):
+                        
+                        lett = str(row[j+1])
+                        
+                        if (not lett.isalpha())and len(lett)>1:
+                            for w in lett:
+                                if w.isdigit():
+                                    nflag=True
+                                    break
+                        
+                        if nflag:
+                            #print row
+                            wrd11 = re.sub('^[a-z]*[^a-zA-Z0-9]*[a-z]*[^a-zA-Z0-9]*',"",lett)
+                            wrd22 = re.findall('[a-z]*$',wrd11)
+                    
+                            if len(wrd22)>1:
+                                nflag =False
+                                details.append(wrd1)
+                                break
+                            wrd22= re.findall('^[a-z]+[0-9]*$',lett)
+                            if len(wrd22)>=1:
+                                nflag =False
+                                details.append(wrd1)
+                                break
+                            wrd22 = re.findall('[^a-z0-9/-]$',lett)
+                            if len(wrd22)>=1:
+                                nflag =False
+                                details.append(wrd1)
+                                break
+                            
+                            details.append(wrd11)
+                            break
+
                     details.append(wrd1)
                     break
 
@@ -257,7 +298,7 @@ def fetchAmount(dta):
                 #     break
                 #===============================================================
                 
-                if wrd in filter:
+                if wrd in filter_wrd:
                     break
                 
                 if (not lett.isalpha())and len(lett)>1:
@@ -335,7 +376,6 @@ def fetch_nertag(nertag):
     else :
         res[prevwt[-1]] = prevwt[0]
         
-    print res            
     return res
 
 
@@ -391,7 +431,5 @@ def fetch_nertag_item(nertag):
         res[prevwt[-1]] = iname
     else :
         res[prevwt[-1]] = prevwt[0]
-    
-    print res
-                    
+      
     return res
