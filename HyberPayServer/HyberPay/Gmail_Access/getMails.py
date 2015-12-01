@@ -31,6 +31,8 @@ from HyberPay.NER.common_functions import ner, OTHERS_MODEL, UTILITY_MODEL,\
 from HyberPay.NER.item_name import GLM
 from HyberPay.NER import utility_bills, doa_travel, dod_travel, toa_travel,\
     tod_travel, deploc_travel, arvloc_travel
+import re
+
 
 CLIENT_SECRETS = os.path.join(os.path.dirname(__file__),'client_secret.json')
 
@@ -394,7 +396,8 @@ def get_gmailData(msglist,mreaderlist):
         jsondict['m'] = dte1[1]
         jsondict['y'] = dte1[2]
         
-        jsondict['ammount'] = amt[0]
+        amt1= re.sub('^[a-zA-Z]*[^a-zA-Z0-9]*','',amt[0])
+        jsondict['ammount'] = re.sub('[a-zA-Z]*[^a-zA-Z0-9]*$','',amt1)
         jsondict['label'] = mreader1.label
         
         strt_time = time.time()
