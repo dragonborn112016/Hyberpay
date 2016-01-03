@@ -5,12 +5,7 @@ Created on Nov 27, 2015
 '''
 
 from __future__ import division
-import re
-from numpy import *
 from collections import defaultdict
-import sys
-import time
-import os
 
 
 class GLMP:
@@ -137,5 +132,3 @@ class GLM(GLMP):
             fea = t[0].strip()
             val = float(t[1])
             self.V[fea] = val
-
-

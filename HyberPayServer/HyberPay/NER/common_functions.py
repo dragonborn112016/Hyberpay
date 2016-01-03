@@ -24,11 +24,10 @@ def argmax(ls):
     ''' takes a list of pairs (item,score) and returns argmax'''
     return max(ls,key = lambda x:x[1])
 
-    
 def viterbiGLM(glm,sentence):
     ''' x is sentence, find the tags for sentence'''
     n = len(sentence)
-    #print 'len of mail :',n
+    
     # the tag sets
     def K(k):
         if k in (-1,0):
@@ -45,13 +44,13 @@ def viterbiGLM(glm,sentence):
         ''' dot product of two vectors'''
         dp = 0
         for k in g.keys():
-            if k in v:
-                dp +=1
+            dp +=v[k]
         return dp
         
 
     # the viterbi algo
     #create and initialise chart
+    
     pi = {}
     pi[0,'*','*']=0
     bp = {}
@@ -67,6 +66,7 @@ def viterbiGLM(glm,sentence):
 
 
     # follow back pointers in the chart
+    
     (y[n-1],y[n]),score = argmax([((u,s),pi[n,u,s]+dot_product(v,g((u,s,x,n+1),'STOP')))
                                   for u in K(n-1) for s in K(n)])
 
@@ -74,10 +74,11 @@ def viterbiGLM(glm,sentence):
     for k in xrange(n-2,0,-1):
         y[k] = bp[k+2,y[k+1],y[k+2]]
     y[0] = '*'
-    #scores = [pi[i,y[i-1],y[i]]for i in xrange(1,n)]
+    scores = [pi[i,y[i-1],y[i]]for i in range(1,n)]
+    #print y
+    return y[1:n+1]
 
-    return y[1:n+1]#,scores+[score]
-
+    
 
 def gen_fea_vec(glm,tagseq,sentence):
     fea_vec = defaultdict(int)
@@ -161,14 +162,16 @@ def read_sentences(handle):
 
 def print_tags(sentence, tagging,glm):
     ''' print out tagged sentence'''
-    return "\n".join([w + " "+ t for w,t in zip(sentence, tagging) if t !='O'])
+    return "\n".join([w + " "+ t for w,t in zip(sentence, tagging) if t !='O' ]) #
         
 
 def ner(sentence_file,glm):
     ''' named entity recognizer '''
+    #print sentence_file
     sentence = sentence_file.split()
     #tagging,scores = viterbiGLM(glm,sentence)
     tagging = viterbiGLM(glm,sentence)
+    #print print_tags(sentence ,tagging,glm)
     return print_tags(sentence ,tagging,glm)
 
 

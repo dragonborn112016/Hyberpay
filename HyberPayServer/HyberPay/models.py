@@ -27,14 +27,15 @@ class UserMailsModel(models.Model):
         ordering = ['-timestamp']
     #catagory, orderid item etc fields to be created later on
 
-class UserDashboardModel(models.Model):
-    ucm = models.OneToOneField(UserContactModel,primary_key = True)
-    month1 = models.CharField(max_length = 20)
-    month2 = models.CharField(max_length = 20)
-    month3 = models.CharField(max_length = 20)
-    month4 = models.CharField(max_length = 20)
-    month5 = models.CharField(max_length = 20)
-    month6 = models.CharField(max_length = 20)
+class UserExpenseModel(models.Model):
+    ucm = models.ForeignKey(UserContactModel)
+    month = models.CharField(max_length = 10)
+    month_id = models.IntegerField()
+    utility = models.FloatField()
+    others = models.FloatField()
+    travel = models.FloatField()
+    class Meta:
+        ordering = ['month_id']
 
 class MailAttachmentModel(models.Model):
     umm = models.ForeignKey(UserMailsModel)

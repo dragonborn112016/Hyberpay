@@ -24,27 +24,28 @@ class GLMP:
         return self.TAGS.keys()
 
 
-    def fea_Tag(self,w,t,i,n):
-        ''' returns feature TAG:W:T where T is T(i)=tag  and W is W(i)=word
-        at ith position in history'''
-        if i<n:
-            return 'TAG:'+w[i]+':'+t
-        else :
-            return 'TAG:'+''+':'+'STOP'
+##    def fea_Tag(self,w,t,i,n):
+##        ''' returns feature TAG:W:T where T is T(i)=tag  and W is W(i)=word
+##        at ith position in history'''
+##        if i<n:
+##            return 'TAG:'+w[i]+':'+t
+##        else :
+##            return 'TAG:'+''+':'+'STOP'
 
     def fea_Trigram(self,s,u,v):
         ''' returns feature TRIGRAM:S:U:V where s=T(-2) u=T(-1) v=T'''
         return 'TRIGRAM:'+s+':'+u+':'+v
 
     def make_map(self,w):
+        ''' maps the word so that alphabets-> x numbers ->d and spcl charachters ->s'''
         mp = ''
         for let in w:
             if let.isalpha():
-                mp += 'x'
+                mp+='x'
             elif let.isdigit():
-                mp += 'd'
+                mp+='d'
             else:
-                mp += 's'
+                mp+='s'
 
         if len(mp)<=4:
             return mp
@@ -57,6 +58,7 @@ class GLMP:
         
 
     def fea_digit(self,h,t):
+        ''' if the word contains digit'''
         i = h[3]
         n = len(h[2])
         if i<n:
@@ -67,6 +69,7 @@ class GLMP:
         return ''
 
     def fea_all_digit(self,h,t):
+        ''' if all letters in the word are digits'''
         i = h[3]
         n = len(h[2])
         if i<n:
@@ -76,6 +79,7 @@ class GLMP:
         return ''
 
     def fea_map(self,h,t):
+        ''' map features MAP:map(w(i)):tag(i)'''
         i = h[3]
         n = len(h[2])
         if i<n:
@@ -86,6 +90,7 @@ class GLMP:
         return ''
 
     def fea_words(self,h,t,j):
+        ''' WORD:map(w(i)):prev word at jth position:j:tag'''
         i = h[3]
         n = len(h[2])
         if i<n:
@@ -100,6 +105,7 @@ class GLMP:
         return ''
 
     def fea_word_map(self,h,t,j):
+        ''' join of word and map features'''
         i = h[3]
         n = len(h[2])
         if i<n:
@@ -113,42 +119,61 @@ class GLMP:
             
         return ''
 
+    def fea_Ptag(self,h,t,j):
+        i = h[3]
+        n = len(h[2])
+        if i<n:
+            prev = h[2][:i]
+            if len(prev)<j:
+                return ''
+            
+            return 'PTAG:'+prev[-j]+':'+str(j)+':'+t
+            
+        return 'PTAG:'+h[2][:i][-j]+':'+str(j)+':'+'STOP'
+
+    def fea_Ftag(self,h,t,j):
+        i = h[3]
+        n = len(h[2])
+        if i+j<n:
+            fwd = h[2][i:]
+            
+            return 'FTAG:'+fwd[j]+':'+str(j)+':'+t
+            
+        return ''
+
     def fea_g(self,h,t):
         ''' returns a vector of features for a given history'''
 ##        sys.stderr.write(" history : %s len : %s \n" %(h[3],len(h[2])))
-##        suff1 = self.fea_Suffix(h,t,1)
-##        suff2 = self.fea_Suffix(h,t,2)
-##        suff3 = self.fea_Suffix(h,t,1)
-##        item = self.fea_item(h,t)
+
         dig = self.fea_digit(h,t)
         all_dig = self.fea_all_digit(h,t)
-##        order = self.fea_order(h,t)
         mp = self.fea_map(h,t)
         g =  {
-                    self.fea_Tag(h[2],t,h[3],len(h[2])):1,
+                    #self.fea_Tag(h[2],t,h[3],len(h[2])):1,
                     self.fea_Trigram(h[0],h[1],t):1
                     }
 
         if mp !='':
             g[mp]=1
-##
-##        if item != '':
-##            g[item]=1
         if dig != '':
             g[dig]=1
         if all_dig !='':
             g[all_dig]=1
-##        if order !='':
-##            g[order]=1
 
         for j in xrange(1,10):
             f  = self.fea_words(h,t,j)
             f1 = self.fea_word_map(h,t,j)
+            f2 = self.fea_Ptag(h,t,j)
+            f3 = self.fea_Ftag(h,t,j)
             if f !='':
                 g[f]=1
 
             if f1 !='':
                 g[f1] = 1
+            if f2 !='':
+                g[f2] =1
+            if f3 !='':
+                g[f3]=1
             
 
         return g

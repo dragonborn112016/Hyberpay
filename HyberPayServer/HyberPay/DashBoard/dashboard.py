@@ -5,54 +5,12 @@ Created on Dec 1, 2015
 '''
 
 from __future__ import division
-from HyberPay.models import UserContactModel, UserMailsModel, UserDashboardModel
-import time
-import re
-from HyberPay.DataProcessing.getIdDetaills import fetchAmount
+from HyberPay.models import UserContactModel, UserMailsModel,\
+    UserExpenseModel
 from django.http.response import JsonResponse
-
-
-def get_price(data):
-    amt = fetchAmount(data)
-    if not amt:
-        return []
-    amt1= re.sub('^[a-zA-Z]*[^a-zA-Z0-9]*','',amt[0])
-    amt2 = re.sub('[a-zA-Z]*[^a-zA-Z0-9]*$','',amt1)
-    return re.sub('[,]', '', amt2)
+from HyberPay.DashBoard.dashboard_utility import get_monthly_expense, IND_OTHERS,\
+    IND_UTILITY, IND_TRAVEL
     
-    
-def get_monthly_expense(umm):
-    
-    
-    month_dic = {i:[] for i in xrange(1,7)}
-    cur_time = int(time.time()*1000)
-    
-    i=1
-    dte = time.strftime('%d/%m/%Y',  time.gmtime(int(cur_time)/1000))
-    dte1 = dte.split('/')
-    cur_month = int(dte1[1])
-    for m in umm:
-        timestamp = m.timestamp
-        dte = time.strftime('%d/%m/%Y',  time.gmtime(int(timestamp)/1000))
-        dte1 = dte.split('/')
-        price = get_price(m.text_mail)
-        if not price:
-            continue
-        m_month = int(dte1[1])
-        if cur_month == m_month:
-            month_dic[i] += [float(price)]
-        else:
-            skp = cur_month - m_month
-            cur_month = m_month
-            i +=int(skp)
-            if i>6:
-                break
-            month_dic[i] += [float(price)]
-    
-    for k in month_dic:
-        month_dic[k] = sum(month_dic[k])
-    
-    return month_dic
 
     
 def make_dashboard(request):
@@ -60,29 +18,42 @@ def make_dashboard(request):
     user = UserContactModel.objects.get(user = username)
     
     umm = UserMailsModel.objects.filter(ucm = user)
-    month_dic = get_monthly_expense(umm)
-    response = JsonResponse(month_dic)
+    for_months =4;
+    month_dic = get_monthly_expense(umm,for_months)
+    ret_dic = {"Total Expense" : month_dic}
+    response = JsonResponse(ret_dic,safe=False)
     return response
     
 def savedashboard(request):
     username = request.user
     user = UserContactModel.objects.get(user = username)
     umm = UserMailsModel.objects.filter(ucm = user)
-    month_dic = get_monthly_expense(umm)
+    for_months =7;
+    month_dic = get_monthly_expense(umm,for_months)
     resp = {}
-    try :
-        udb = UserDashboardModel.objects.get(ucm=user)
-        resp['status'] = 'modified'
-    except :
-        udb = UserDashboardModel()
-        udb.ucm = user
-        resp['status'] = 'created'
+    uems = UserExpenseModel.objects.filter(ucm = user)
+    if uems:
+        i=1
+        for uem in uems:
+            uem.month_id = i;
+            uem.month = month_dic[i]['month']
+            uem.others = month_dic[i]['data'][IND_OTHERS]['total']
+            uem.utility = month_dic[i]['data'][IND_UTILITY]['total']
+            uem.travel = month_dic[i]['data'][IND_TRAVEL]['total']
+            uem.save()
+            i +=1;
         
-    udb.month1 = month_dic[1]
-    udb.month2 = month_dic[2]
-    udb.month3 = month_dic[3]
-    udb.month4 = month_dic[4]
-    udb.month5 = month_dic[5]
-    udb.month6 = month_dic[6]
-    udb.save()
+        resp['status'] = 'modified'
+    else :
+        
+        for i in xrange (1,7):
+            uem = UserExpenseModel()
+            uem.ucm = user
+            uem.month_id = i;
+            uem.month = month_dic[i]['month']
+            uem.others = month_dic[i]['data'][IND_OTHERS]['total']
+            uem.utility = month_dic[i]['data'][IND_UTILITY]['total']
+            uem.travel = month_dic[i]['data'][IND_TRAVEL]['total']
+            uem.save()
+        resp['status'] = 'created'
     return JsonResponse(resp)

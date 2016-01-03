@@ -375,11 +375,13 @@ def fetch_nertag(nertag):
         res[prevwt[-1]] = iname
     else :
         res[prevwt[-1]] = prevwt[0]
-        
+    
+    #print res
     return res
 
 
 def fetch_nertag_item(nertag):
+    
     if nertag.strip()=='' or nertag.strip()== None:
         return {}
 
@@ -387,7 +389,6 @@ def fetch_nertag_item(nertag):
     prevwt = ['']
     iname = ''
     tag =[]
-    
     
     for wt in nertag.split('\n'):
         same_flag = False
@@ -431,5 +432,6 @@ def fetch_nertag_item(nertag):
         res[prevwt[-1]] = iname
     else :
         res[prevwt[-1]] = prevwt[0]
-      
+    
+    #print res
     return res
