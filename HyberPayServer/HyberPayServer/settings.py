@@ -78,6 +78,7 @@ AUTHENTICATION_BACKENDS = (
     #'social_auth.backends.google.GoogleOAuth2Backend',
     'django.contrib.auth.backends.ModelBackend',
 )   
+
 WSGI_APPLICATION = 'HyberPayServer.wsgi.application'
 
 
@@ -114,3 +115,4 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = (
     os.path.join(BASE_DIR,'..','static'),
 )
+
