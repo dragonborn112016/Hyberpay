@@ -32,6 +32,7 @@ def main_page(request):
                 ucm  = UserContactModel()
                 ucm.user=user
                 ucm.contact_no ='unknown'
+                ucm.mailJson = "[]"
                 ucm.save()
             finally:
                 res =  get_credentials(request)

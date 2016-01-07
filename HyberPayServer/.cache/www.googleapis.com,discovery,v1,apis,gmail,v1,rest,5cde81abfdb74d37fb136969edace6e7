@@ -1,16 +1,16 @@
 status: 200
 alternate-protocol: 443:quic,p=1
-content-length: 59837
+content-length: 59828
 x-xss-protection: 1; mode=block
 content-location: https://www.googleapis.com/discovery/v1/apis/gmail/v1/rest
 x-content-type-options: nosniff
-age: 177
-expires: Mon, 28 Dec 2015 14:55:32 GMT
+age: 228
+expires: Wed, 06 Jan 2016 13:07:53 GMT
 vary: Origin, X-Origin
-server: GSE
-etag: "ye6orv2F-1npMW3u9suM3a7C5Bo/SXplt710j0kUBElDUmuzzx7iUac"
+server: GFE/2.0
+etag: "ye6orv2F-1npMW3u9suM3a7C5Bo/Dzk5nmgOdShP6RMmKTsEhqghl2I"
 cache-control: public, max-age=300, must-revalidate, no-transform
-date: Mon, 28 Dec 2015 14:50:32 GMT
+date: Wed, 06 Jan 2016 13:02:53 GMT
 x-frame-options: SAMEORIGIN
 alt-svc: quic=":443"; ma=604800; v="30,29,28,27,26,25"
 content-type: application/json; charset=UTF-8
@@ -18,12 +18,12 @@ content-type: application/json; charset=UTF-8
 
 {
  "kind": "discovery#restDescription",
- "etag": "\"ye6orv2F-1npMW3u9suM3a7C5Bo/SXplt710j0kUBElDUmuzzx7iUac\"",
+ "etag": "\"ye6orv2F-1npMW3u9suM3a7C5Bo/Dzk5nmgOdShP6RMmKTsEhqghl2I\"",
  "discoveryVersion": "v1",
  "id": "gmail:v1",
  "name": "gmail",
  "version": "v1",
- "revision": "20151001",
+ "revision": "20151214",
  "title": "Gmail API",
  "description": "The Gmail REST API.",
  "ownerDomain": "google.com",
@@ -675,7 +675,7 @@ content-type: application/json; charset=UTF-8
     },
     "topicName": {
      "type": "string",
-     "description": "A fully qualified Google Cloud Pub/Sub API topic name to publish the events to. This topic name **must** already exist in Cloud Pub/Sub and you **must** have already granted gmail \"publish\" permission on it. For example, \"projects/my-project-identifier/topics/my-topic-name\" (using the new Cloud Pub/Sub \"v1beta2\" topic naming format).\n\nNote that the \"my-project-identifier\" portion must exactly match your Google developer project id (the one executing this watch request)."
+     "description": "A fully qualified Google Cloud Pub/Sub API topic name to publish the events to. This topic name **must** already exist in Cloud Pub/Sub and you **must** have already granted gmail \"publish\" permission on it. For example, \"projects/my-project-identifier/topics/my-topic-name\" (using the Cloud Pub/Sub \"v1\" topic naming format).\n\nNote that the \"my-project-identifier\" portion must exactly match your Google developer project id (the one executing this watch request)."
     }
    }
   },

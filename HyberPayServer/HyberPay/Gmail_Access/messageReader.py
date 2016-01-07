@@ -3,19 +3,32 @@ Created on Oct 24, 2015
 
 @author: SIDHARTH
 '''
+from ssl import Purpose
 
 class MessageReader():
     
     def __init__(self):
-        self.msgId=''
-        self.text=''
-        self.html=''
-        self.no_of_files=0
-        self.filename=[]
-        self.att_id=[]
-        self.sender=''
-        self.date=0
-        self.label = ''
+        self.msgId = ""
+        self.text = ""
+        self.html = ""
+        self.no_of_files = 0
+        self.filename = []
+        self.att_id = []
+        self.sender = ""
+        self.date = 0
+        self.label = ""
+        
+        self.amount = ""
+        
+        self.DOD = ""
+        self.TOD = ""
+        self.DEPLOC = ""
+        
+        self.ITEM = ""
+        self.PURP = ""
+        
+        self.DD = ""
+        
     
     def setMsgId(self,msgId):
         self.msgId = msgId
@@ -44,3 +57,25 @@ class MessageReader():
         
     def setLabel(self,label):
         self.label=label
+    
+    def setAmount(self,amount):
+        self.amount=amount
+    
+    def setDD(self,DD):
+        self.DD=DD
+    
+    def setITEM(self,ITEM):
+        self.ITEM=ITEM
+        
+    def setPURP(self,PURP):
+        self.PURP=PURP
+    
+    def setDOD(self,DOD):
+        self.DOD=DOD
+    
+    def setTOD(self,TOD):
+        self.TOD=TOD
+    
+    def setDEPLOC(self,DEPLOC):
+        self.DEPLOC=DEPLOC
+        

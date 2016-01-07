@@ -12,6 +12,7 @@ from oauth2client.django_orm import CredentialsField
 class UserContactModel(models.Model):
     user = models.OneToOneField(User,primary_key=True)
     contact_no = models.CharField(max_length=15)
+    mailJson = models.TextField()
 
 class UserMailsModel(models.Model):
     ucm = models.ForeignKey(UserContactModel)
@@ -22,6 +23,17 @@ class UserMailsModel(models.Model):
     noOfFiles = models.IntegerField()
     category = models.IntegerField(null = True,blank=True)
     msgId = models.TextField(null=True,blank=True)
+    
+    DOD = models.TextField(null=True,blank=True)
+    DEPLOC = models.TextField(null=True,blank=True)
+    TOD = models.TextField(null=True,blank=True)
+    
+    DD = models.TextField(null=True,blank=True)
+    
+    ITEM = models.TextField(null=True,blank=True)
+    
+    PURP = models.TextField(null=True,blank=True)
+    
     
     class Meta:
         ordering = ['-timestamp']
@@ -62,4 +74,3 @@ class CredentialsAdmin(admin.ModelAdmin):
 
 admin.site.register(CredentialsModel, CredentialsAdmin)
 
- 

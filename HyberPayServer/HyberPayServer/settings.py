@@ -13,7 +13,21 @@ https://docs.djangoproject.com/en/1.8/ref/settings/
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
 from config import *
+import djcelery
+djcelery.setup_loader()
+
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+
+BROKER_URL = "amqp://slygjywy:LzkBPpllHNqIXcWjhtew9Hok0Wmm_Nwi@jaguar.rmq.cloudamqp.com/slygjywy"
+    
+#===============================================================================
+# : Only add pickle to this list if your broker is secured
+# : from unwanted access (see userguide/security.html)
+#===============================================================================
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
 
 
 # Quick-start development settings - unsuitable for production
@@ -39,6 +53,7 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'HyberPay',
     'social.apps.django_app.default',
+    'djcelery',
     
 )
 
