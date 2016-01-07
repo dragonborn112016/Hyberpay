@@ -1,17 +1,16 @@
 from django.contrib.auth import logout, login, authenticate
-from django.http import request
-from django.http.response import HttpResponse, HttpResponseRedirect
-from django.shortcuts import render, render_to_response
+from django.http.response import HttpResponse
 from django.template.context import RequestContext
 from django.template.loader import get_template
 
 from HyberPay.Gmail_Access.getMails import *
 from HyberPay.forms import *
 from HyberPay.models import *
-from django.shortcuts import render_to_response, redirect, render
+from django.shortcuts import render_to_response, redirect
 from django.contrib.auth import logout as auth_logout
 from fileinput import filename
-
+import httplib2
+from apiclient.discovery import build
 
 # Create your views here.
 def main_page(request):

@@ -1,10 +1,7 @@
 
 # Create your views here.
 import os
-import httplib2
-from apiclient.discovery import build
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponse
 from django.http import HttpResponseRedirect
 from HyberPay.models import CredentialsModel, UserContactModel, UserMailsModel
 from HyberPayServer import settings
@@ -14,10 +11,9 @@ from oauth2client.django_orm import Storage
 import base64
 from django.http.response import JsonResponse
 from django.db.models import Max
-from django.shortcuts import render_to_response
-from django.template.context import RequestContext
+#from django.shortcuts import render_to_response
+#from django.template.context import RequestContext
 from HyberPay.tasks import processMailsTask
-import json
 import ast
 
 
@@ -27,13 +23,14 @@ FLOW =flow_from_clientsecrets(
     CLIENT_SECRETS,
     scope= "https://mail.google.com/",
     redirect_uri='http://hyberpay.herokuapp.com/oauth2callback')
+    #redirect_uri='http://localhost:8000/oauth2callback')#'http://hyberpay.herokuapp.com/oauth2callback')
 
 
 
 @login_required
 def auth_return(request):
     
-    getIdDetailsHyberpayFlagOffset = request.POST.get('getIdDetailsHyberpayFlagOffset',0)
+    #getIdDetailsHyberpayFlagOffset = request.POST.get('getIdDetailsHyberpayFlagOffset',0)
     
     if not xsrfutil.validate_token(settings.SECRET_KEY, request.POST.get('state',False),
                                    request.user):
@@ -53,9 +50,9 @@ def auth_return(request):
     storage = Storage(CredentialsModel, 'id', request.user, 'credential')
     storage.put(credential)
     
-    if getIdDetailsHyberpayFlagOffset ==1 or getIdDetailsHyberpayFlagOffset == '1':
-        return get_mailIds(request)
-    return get_credentials(request)
+    #if getIdDetailsHyberpayFlagOffset ==1 or getIdDetailsHyberpayFlagOffset == '1':
+    return get_mailIds(request)
+    #return get_credentials(request)
 
 
 @login_required
@@ -85,12 +82,14 @@ def get_credentials(request,getIdDetailsHyberpayFlagOffset=0):
             print 'credentials exception'
             return HttpResponseRedirect('/')
     
-    if getIdDetailsHyberpayFlagOffset :
-        return get_mailIds(request)
-    
-    context = RequestContext(request, {
-        'request': request, 'user': request.user})   
-    return render_to_response('index.html', context_instance=context)
+    #if getIdDetailsHyberpayFlagOffset :
+    return get_mailIds(request)
+    #===========================================================================
+    # 
+    # context = RequestContext(request, {
+    #     'request': request, 'user': request.user})   
+    # return render_to_response('index.html', context_instance=context)
+    #===========================================================================
 
 
 
@@ -99,8 +98,16 @@ def get_mailIds(request):
     storage = Storage(CredentialsModel, 'id', request.user, 'credential')
     credential = storage.get()
     if credential is None or credential.invalid == True:
-        print "in get mail ids : invalid credentials"
-        return get_credentials(request,1)
+        FLOW.params['state'] = xsrfutil.generate_token(settings.SECRET_KEY,
+                                                       request.user)
+        
+        try:
+            authorize_url = FLOW.step1_get_authorize_url()
+            print 'authorizing user :',authorize_url
+            return HttpResponseRedirect(authorize_url)
+        except :
+            print 'credentials exception'
+            return HttpResponseRedirect('/')
         
     else:
         username = request.user

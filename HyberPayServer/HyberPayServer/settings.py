@@ -20,7 +20,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
 BROKER_URL = "amqp://slygjywy:LzkBPpllHNqIXcWjhtew9Hok0Wmm_Nwi@jaguar.rmq.cloudamqp.com/slygjywy"
-    
+#BROKER_URL = 'amqp://guest@localhost//'
 #===============================================================================
 # : Only add pickle to this list if your broker is secured
 # : from unwanted access (see userguide/security.html)
