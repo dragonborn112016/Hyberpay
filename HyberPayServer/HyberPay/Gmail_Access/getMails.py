@@ -26,7 +26,7 @@ CLIENT_SECRETS = os.path.join(os.path.dirname(__file__),'client_secret.json')
 FLOW =flow_from_clientsecrets(
     CLIENT_SECRETS,
     scope= "https://mail.google.com/",
-    redirect_uri='http://localhost:8000/oauth2callback')
+    redirect_uri='http://hyberpay.herokuapp.com/oauth2callback')
 
 
 
