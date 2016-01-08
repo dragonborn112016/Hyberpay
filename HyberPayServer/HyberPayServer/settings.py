@@ -15,6 +15,7 @@ import os
 from config import *
 import djcelery
 djcelery.setup_loader()
+import dj_database_url
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -124,14 +125,15 @@ WSGI_APPLICATION = 'HyberPayServer.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'd8poljpstrjnlq',                      
-        'USER': 'fytwzlbgkhupup',
-        'PASSWORD': 'cfzLeXf89dg8_ppfjWUcXJQbi6',
-        'HOST': 'ec2-54-204-8-138.compute-1.amazonaws.com',
-        'PORT': '5432',
+        'ENGINE': 'django.db.backends.postgresql_psycopg2'
     }
 }
+
+DATABASES['default'] =  dj_database_url.config()
+
+# Honor the 'X-Forwarded-Proto' header for request.is_secure()
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
 
 
 # Internationalization
