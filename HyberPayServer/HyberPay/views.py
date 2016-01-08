@@ -37,8 +37,8 @@ def main_page(request):
                 res =  get_credentials(request)
                 print 'credentials created : '
                 return res
-    except:
-        print "exception"
+    except Exception,error:
+        print "exception :",error
     
     print 'redirecting'
     context = RequestContext(request, {

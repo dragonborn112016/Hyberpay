@@ -44,6 +44,7 @@ def processMailsTask(user_id, timestamp):
     service : it is an instance of gmailService
     timestamp : this is the timestamp of last downloaded mail
     '''
+    tot_time = time.time()
     user = UserContactModel.objects.get(user_id = user_id)
     
     username = user.user 
@@ -68,17 +69,16 @@ def processMailsTask(user_id, timestamp):
     user.mailJson = jsonlist.__str__()
     user.save()
     print "write done :"
+    print 'total time taken :',time.time()-tot_time
     return None
 
 
 def saveUserMails(usercontactmodel,mreaderlist):
     
     for mreader in mreaderlist:
-        #=======================================================================
-        # msgId = mreader.msgId
-        # if len(UserMailsModel.objects.filter(msgId=msgId))==0:
-        #     continue
-        #=======================================================================
+        msgId = mreader.msgId
+        if len(UserMailsModel.objects.filter(msgId=msgId, ucm = usercontactmodel)) > 0:
+            continue
         umm = UserMailsModel()
         umm.ucm = usercontactmodel
         
@@ -113,6 +113,25 @@ def saveUserMails(usercontactmodel,mreaderlist):
                 mam.att_id = att_id[i]
                 i+=1
                 mam.save()
+                
+
+def UpdateUserMails(usercontactmodel,mreaderlist):
+    
+    for mreader in mreaderlist:
+        msgId = mreader.msgId
+        umm = UserMailsModel.objects.filter(msgId=msgId, ucm = usercontactmodel)[0]
+        
+        umm.DD = mreader.DD
+        
+        umm.DOD = mreader.DOD
+        umm.TOD = mreader.TOD
+        umm.DEPLOC = mreader.DEPLOC
+        
+        umm.ITEM = mreader.ITEM
+        umm.PURP = mreader.PURP
+        
+        #print 'message id: ',mreader.msgId
+        umm.save()
         
 
 def getListfromdb(usercontactmodel):
@@ -203,7 +222,7 @@ def readparts(parts):
                 mreader.setAtt_id(att_ids)
 
         except Exception,error:
-            print "error occured reading mimeType %s" % error
+            print "error occurred reading mimeType " , error
     
     return mreader
 
@@ -213,7 +232,8 @@ def fetchmails(service,timestamp):
     if timestamp:
         query = query+" after:"+str(timestamp)
     else:
-        query = query+" newer_than:1m"
+        print "first time downloaded"
+        query = query+" newer_than:10m"
     mes = ListMessagesMatchingQuery(service, 'me', query)
     
     msglist=[];
@@ -261,7 +281,6 @@ def fetchmails(service,timestamp):
 
 def get_gmailData(usercontactmodel,msglist,mreaderlist):
     
-    tot_time = time.time()
     
     tdata=[]
     for mreader in mreaderlist:
@@ -338,7 +357,6 @@ def get_gmailData(usercontactmodel,msglist,mreaderlist):
         mreader1.amount = amt
         jsondict['label'] = mreader1.label
         
-        strt_time = time.time()
         if mreader1.label == 'others':
             
             #print mreader1.ITEM
@@ -346,9 +364,11 @@ def get_gmailData(usercontactmodel,msglist,mreaderlist):
             if not mreader1.ITEM :
                 nertags = ner(data, others_glm)
                 jsondict.update(fetch_nertag_item(nertags))
-                mreader1.ITEM = mreader1.DD = jsondict["ITEM"] if jsondict.has_key("ITEM") else ""
-                mreader1.PURP = mreader1.DD = jsondict["PURP"] if jsondict.has_key("PURP") else ""
-            
+                mreader1.ITEM = jsondict["ITEM"] if jsondict.has_key("ITEM") else ""
+                mreader1.PURP = jsondict["PURP"] if jsondict.has_key("PURP") else ""
+            else:
+                jsondict.update({"ITEM" : mreader1.ITEM,
+                                 "PURP" : mreader1.PURP})
             #print 'time taken for others :',time.time()-strt_time
         
         elif mreader1.label == 'utility':
@@ -359,10 +379,11 @@ def get_gmailData(usercontactmodel,msglist,mreaderlist):
                     dte = parse(dd_dic["DD"])
                     dd_dic["DD"] = str(dte.day) + '/' + str(dte.month) + '/' + str(dte.year)
                 except Exception,e:
-                    print "exception parsing DD: error :" ,e
+                    print "exception parsing DD: error :",dd_dic," : Error :" ,e
                 jsondict.update(dd_dic)
                 mreader1.DD = jsondict["DD"] if jsondict.has_key("DD") else ""
-            
+            else:
+                jsondict.update({"DD" : mreader1.DD})
             #print 'time taken for utility :',time.time()-strt_time
         
         elif mreader1.label == 'travel':
@@ -375,7 +396,7 @@ def get_gmailData(usercontactmodel,msglist,mreaderlist):
                     dte = parse(dod_dic["DOD"])
                     dod_dic["DOD"] = str(dte.day) + '/' + str(dte.month) + '/' + str(dte.year)
                 except Exception,e:
-                    print "exception parsing DOD: error:" ,e
+                    print "exception parsing DOD: error:",dod_dic," : Error: " ,e
                 jsondict.update(dod_dic)
                 
                 nertags = ner(data, tod_travel_glm)
@@ -384,10 +405,13 @@ def get_gmailData(usercontactmodel,msglist,mreaderlist):
                 nertags = ner(data, deploc_travel_glm)
                 jsondict.update(fetch_nertag(nertags))
                 
-                mreader1.DOD = mreader1.DD = jsondict["DOD"] if jsondict.has_key("DOD") else ""
-                mreader1.TOD = mreader1.DD = jsondict["TOD"] if jsondict.has_key("TOD") else ""
-                mreader1.DEPLOC = mreader1.DD = jsondict["DEPLOC"] if jsondict.has_key("DEPLOC") else ""
-            
+                mreader1.DOD = jsondict["DOD"] if jsondict.has_key("DOD") else ""
+                mreader1.TOD = jsondict["TOD"] if jsondict.has_key("TOD") else ""
+                mreader1.DEPLOC = jsondict["DEPLOC"] if jsondict.has_key("DEPLOC") else ""
+            else:
+                jsondict.update({"DOD" : mreader1.DOD,
+                                 "TOD" : mreader1.TOD,
+                                 "DEPLOC" : mreader1.DEPLOC})
             #print 'time taken for travel :',time.time()-strt_time
                 
         
@@ -417,9 +441,8 @@ def get_gmailData(usercontactmodel,msglist,mreaderlist):
         jsonlist.append(jsondict)
         mreaderlist[mapping[i]] = mreader1
     
-    #print "data len :",len(jsonlist) 
-    #saveUserMails(usercontactmodel, mreaderlist)
-    print 'total time taken :',time.time()-tot_time
+    print "data len :",len(jsonlist) 
+    UpdateUserMails(usercontactmodel, mreaderlist)
     return jsonlist
 
 

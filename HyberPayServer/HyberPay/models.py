@@ -17,7 +17,7 @@ class UserContactModel(models.Model):
 class UserMailsModel(models.Model):
     ucm = models.ForeignKey(UserContactModel)
     html_mail = models.TextField()    
-    timestamp = models.IntegerField()
+    timestamp = models.BigIntegerField()
     sender = models.TextField()
     text_mail = models.TextField()
     noOfFiles = models.IntegerField()
