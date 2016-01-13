@@ -3,7 +3,7 @@ from django.http.response import HttpResponse
 from django.template.context import RequestContext
 from django.template.loader import get_template
 
-from HyberPay.Gmail_Access.getMails import *
+from HyberPay.Gmail_Access.getMails import *, CLIENT_SECRETS
 from HyberPay.forms import *
 from HyberPay.models import *
 from django.shortcuts import render_to_response, redirect
@@ -191,20 +191,36 @@ def authTokenCheck(request):
         try:
             idinfo = client.verify_id_token(bulk_data['auth_token_from_Android'], SOCIAL_AUTH_GOOGLE_OAUTH2_KEY)
             #If multiple clients access the backend server:
-            #===================================================================
-            # if idinfo['aud'] not in [ANDROID_CLIENT_ID, SOCIAL_AUTH_GOOGLE_OAUTH2_KEY]:
-            #     raise crypt.AppIdentityError("Unrecognized client.")
-            # if idinfo['iss'] not in ['accounts.google.com', 'https://accounts.google.com']:
-            #     raise crypt.AppIdentityError("Wrong issuer.")
+            if idinfo['aud'] not in [ANDROID_CLIENT_ID, SOCIAL_AUTH_GOOGLE_OAUTH2_KEY]:
+                raise crypt.AppIdentityError("Unrecognized client.")
+            if idinfo['iss'] not in ['accounts.google.com', 'https://accounts.google.com']:
+                raise crypt.AppIdentityError("Wrong issuer.")
+            #==================================================================
             # if idinfo['hd'] != APPS_DOMAIN_NAME:
             #     raise crypt.AppIdentityError("Wrong hosted domain.")
-            #===================================================================
+            #==================================================================
         except crypt.AppIdentityError:
         # Invalid token
             return HttpResponse('<html><body>Invalid token: error</body></html>')
         
-    html_cont = '<html><body>in test method = ' + str(request.method) + '\n post data = ' + str(idinfo) + ' </body></html>'
-    return HttpResponse(html_cont)
+        credentials = client.credentials_from_clientsecrets_and_code(
+        CLIENT_SECRETS,
+        ['profile', 'email'],
+        bulk_data['auth_token_from_Android'])
+        #https://www.googleapis.com/auth/gmail.readonly
+        # Call Google API
+        http_auth = credentials.authorize(httplib2.Http())
+        drive_service = discovery.build('drive', 'v3', http=http_auth)
+        
+        # Get profile info from ID token
+        userid = credentials.id_token['sub']
+        email = credentials.id_token['email']
+        
+        html_cont = '<html><body>in test method = ' + str(request.method) + '\n post data = ' + str(idinfo) +'\n userID = '+userid
+        +'\n email = '+ email + ' </body></html>'
+        return HttpResponse(html_cont)
+    
+    return HttpResponse('<html><body>  </body></html>');
 
 #===============================================================================
 # def oauthtoken_to_user(backend_name,token,request,*args, **kwargs):
