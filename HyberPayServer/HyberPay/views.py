@@ -14,7 +14,8 @@ from apiclient.discovery import build
 from django.views.decorators.csrf import csrf_exempt
 import json
 from oauth2client import client, crypt
-from HyberPayServer.config import SOCIAL_AUTH_GOOGLE_OAUTH2_KEY
+from HyberPayServer.config import SOCIAL_AUTH_GOOGLE_OAUTH2_KEY,\
+    ANDROID_CLIENT_ID
 
 # Create your views here.
 def main_page(request):
@@ -189,9 +190,9 @@ def authTokenCheck(request):
         bulk_data = request.POST
         try:
             idinfo = client.verify_id_token(bulk_data['auth_token_from_Android'], SOCIAL_AUTH_GOOGLE_OAUTH2_KEY)
-            # If multiple clients access the backend server:
+            #If multiple clients access the backend server:
             #===================================================================
-            # if idinfo['aud'] not in [ANDROID_CLIENT_ID, IOS_CLIENT_ID, WEB_CLIENT_ID]:
+            # if idinfo['aud'] not in [ANDROID_CLIENT_ID, SOCIAL_AUTH_GOOGLE_OAUTH2_KEY]:
             #     raise crypt.AppIdentityError("Unrecognized client.")
             # if idinfo['iss'] not in ['accounts.google.com', 'https://accounts.google.com']:
             #     raise crypt.AppIdentityError("Wrong issuer.")
