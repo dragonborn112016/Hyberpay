@@ -1,2 +1,2 @@
 web: sh -c "cd HyberPayServer && gunicorn HyberPayServer.wsgi" --log-file -
-worker: celery worker --app=tasks.app --loglevel=INFO
+worker: sh -c "cd HyberPayServer && celery -A HyberPayServer.celery worker" --loglevel=INFO
