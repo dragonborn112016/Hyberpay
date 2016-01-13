@@ -12,6 +12,9 @@ from fileinput import filename
 import httplib2
 from apiclient.discovery import build
 from django.views.decorators.csrf import csrf_exempt
+import json
+from oauth2client import client, crypt
+from HyberPayServer.config import SOCIAL_AUTH_GOOGLE_OAUTH2_KEY
 
 # Create your views here.
 def main_page(request):
@@ -181,11 +184,48 @@ def get_mail_attachment(request):
 
 @csrf_exempt
 def authTokenCheck(request):
-    meth =  request.method
-    bulk_data = request.POST
-    Bulk =  request.GET
-    html_cont = '<html><body>in test method = ' + str(meth) + '\n post data = ' + str(bulk_data) + '\n get data = '+ str(Bulk) + ' </body></html>'
+    idinfo = {}
+    if request.method == 'POST':
+        bulk_data = request.POST
+        try:
+            idinfo = client.verify_id_token(bulk_data['bulk_data'], SOCIAL_AUTH_GOOGLE_OAUTH2_KEY)
+            # If multiple clients access the backend server:
+            #===================================================================
+            # if idinfo['aud'] not in [ANDROID_CLIENT_ID, IOS_CLIENT_ID, WEB_CLIENT_ID]:
+            #     raise crypt.AppIdentityError("Unrecognized client.")
+            # if idinfo['iss'] not in ['accounts.google.com', 'https://accounts.google.com']:
+            #     raise crypt.AppIdentityError("Wrong issuer.")
+            # if idinfo['hd'] != APPS_DOMAIN_NAME:
+            #     raise crypt.AppIdentityError("Wrong hosted domain.")
+            #===================================================================
+        except crypt.AppIdentityError:
+        # Invalid token
+            return HttpResponse('<html><body>Invalid token: error</body></html>')
+        
+    html_cont = '<html><body>in test method = ' + str(request.method) + '\n post data = ' + str(idinfo) + ' </body></html>'
     return HttpResponse(html_cont)
+
+#===============================================================================
+# def oauthtoken_to_user(backend_name,token,request,*args, **kwargs):
+#     """Check and retrieve user with given token.
+#     """
+#     backend = get_backend(backend_name,request,"")
+#     response = backend.user_data(token) or {}
+#     response['access_token'] = token
+#     kwargs.update({'response': response, backend_name: True})
+#     user = authenticate(*args, **kwargs)
+#     return user
+# 
+# #this is a view
+# def check_my_token(request):
+#     user = oauthtoken_to_user(request.GET.get('backend'),request.GET.get('access_token'),request)
+# 
+#     return HttpResponse(json.dumps({
+#         'status':'success',
+#         'user':user.get_full_name(),
+#         'more stuff': do_somethings()
+#     }),mimetype="application/json")
+#===============================================================================
 
 def tester(request):
     print "in here"
