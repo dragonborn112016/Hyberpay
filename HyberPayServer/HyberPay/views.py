@@ -3,7 +3,7 @@ from django.http.response import HttpResponse
 from django.template.context import RequestContext
 from django.template.loader import get_template
 
-from HyberPay.Gmail_Access.getMails import *, CLIENT_SECRETS
+from HyberPay.Gmail_Access.getMails import *
 from HyberPay.forms import *
 from HyberPay.models import *
 from django.shortcuts import render_to_response, redirect
@@ -16,7 +16,7 @@ import json
 from oauth2client import client, crypt
 from HyberPayServer.config import SOCIAL_AUTH_GOOGLE_OAUTH2_KEY,\
     ANDROID_CLIENT_ID
-
+from apiclient import discovery
 # Create your views here.
 def main_page(request):
     try:
@@ -210,7 +210,7 @@ def authTokenCheck(request):
         #https://www.googleapis.com/auth/gmail.readonly
         # Call Google API
         http_auth = credentials.authorize(httplib2.Http())
-        drive_service = discovery.build('drive', 'v3', http=http_auth)
+        #drive_service = discovery.build('drive', 'v3', http=http_auth)
         
         # Get profile info from ID token
         userid = credentials.id_token['sub']
