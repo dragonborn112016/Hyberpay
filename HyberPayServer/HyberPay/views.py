@@ -11,6 +11,7 @@ from django.contrib.auth import logout as auth_logout
 from fileinput import filename
 import httplib2
 from apiclient.discovery import build
+from django.views.decorators.csrf import csrf_exempt
 
 # Create your views here.
 def main_page(request):
@@ -177,6 +178,14 @@ def get_mail_attachment(request):
         res = JsonResponse(json,safe=False)
         return res
     return HttpResponseRedirect('/')
+
+@csrf_exempt
+def authTokenCheck(request):
+    meth =  request.method
+    bulk_data = request.POST
+    Bulk =  request.GET
+    html_cont = '<html><body>in test method = ' + str(meth) + '\n post data = ' + str(bulk_data) + '\n get data = '+ str(Bulk) + ' </body></html>'
+    return HttpResponse(html_cont)
 
 def tester(request):
     print "in here"

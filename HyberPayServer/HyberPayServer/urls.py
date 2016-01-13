@@ -16,7 +16,7 @@ Including another URLconf
 from django.conf.urls import include, url
 from django.contrib import admin
 from HyberPay.views import main_page,portals_page, registration_page,logout_page,\
-    login_page, tester, logout_social, get_mail_attachment
+    login_page, tester, logout_social, get_mail_attachment, authTokenCheck
 from HyberPay.Gmail_Access.getMails import auth_return, get_mailIds,\
     get_credentials
 from HyberPay.DashBoard.dashboard import make_dashboard, savedashboard
@@ -37,4 +37,5 @@ urlpatterns = [
     url(r'^test$',tester ,name = 'testing'),
     url(r'^dashboard$',make_dashboard ,name = 'dashboard'),
     url(r'^savedashboard$',savedashboard ,name = 'savedashboard'),
+    url(r'sendAuth/$',authTokenCheck ,name = 'authTokenCheck'),
 ]
