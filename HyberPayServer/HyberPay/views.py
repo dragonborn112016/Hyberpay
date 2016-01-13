@@ -188,7 +188,7 @@ def authTokenCheck(request):
     if request.method == 'POST':
         bulk_data = request.POST
         try:
-            idinfo = client.verify_id_token(bulk_data['bulk_data'], SOCIAL_AUTH_GOOGLE_OAUTH2_KEY)
+            idinfo = client.verify_id_token(bulk_data['auth_token_from_Android'], SOCIAL_AUTH_GOOGLE_OAUTH2_KEY)
             # If multiple clients access the backend server:
             #===================================================================
             # if idinfo['aud'] not in [ANDROID_CLIENT_ID, IOS_CLIENT_ID, WEB_CLIENT_ID]:
