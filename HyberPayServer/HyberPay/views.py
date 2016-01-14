@@ -207,7 +207,7 @@ def authTokenCheck(request):
          
         try:
             user = oauthtoken_to_user('google-oauth2', bulk_data['id_token_from_Android'], request)
-            resp = authTokenCreateCredentials(request, authToken = bulk_data['auth_Code_from_Android'],user)
+            resp = authTokenCreateCredentials(request, authToken = bulk_data['auth_Code_from_Android'], user=user)
             return resp
         except Exception,error :
             html_cont = '<html><body>in test method  Error = ' + str(error) + '\n post data = ' + str(idinfo) + '\n userID =' + 'userid' + '\n email = '+ 'email' + '</body></html>'
@@ -230,7 +230,7 @@ def authTokenCreateCredentials(request,authToken,user):
     # Get profile info from ID token
     userid = credentials.id_token['sub']
     email = credentials.id_token['email']
-    html_cont = '<html><body> credentials created = \n post data = ' + '\n userID =' + userid + '\n email = '+ email +'\n request.user = '+ str(user.get_full_name()) +  '</body></html>'
+    html_cont = '<html><body> credentials created = \n post data = ' + '\n userID =' + userid + '\n email = '+ email +'\n request.user = '+ str(request.user) +  '</body></html>'
     return HttpResponse(html_cont)
 
 
