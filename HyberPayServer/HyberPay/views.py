@@ -226,9 +226,11 @@ def authTokenCreateCredentials(request,authToken):
     #drive_service = discovery.build('drive', 'v3', http=http_auth)
        
     # Get profile info from ID token
+    user1 = ''
+    user1 = authenticate(credentials)
     userid = credentials.id_token['sub']
     email = credentials.id_token['email']
-    html_cont = '<html><body> credentials created = \n post data = ' + '\n userID =' + userid + '\n email = '+ email +'\n request.user = '+ str(request.user) +  '</body></html>'
+    html_cont = '<html><body> credentials created = \n post data = ' + '\n userID =' + userid + '\n email = '+ email +'\n request.user = '+ str(user1.get_full_name()) +  '</body></html>'
     return HttpResponse(html_cont)
 
 #===============================================================================
