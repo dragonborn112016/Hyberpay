@@ -205,7 +205,7 @@ def authTokenCheck(request):
             return HttpResponse('<html><body>Invalid token: error</body></html>')
          
         try:
-            resp = authTokenCreateCredentials(request, idToken = bulk_data['auth_Code_from_Android'])
+            resp = authTokenCreateCredentials(request, authToken = bulk_data['auth_Code_from_Android'])
             return resp
         except Exception,error :
             html_cont = '<html><body>in test method  Error = ' + str(error) + '\n post data = ' + str(idinfo) + '\n userID =' + 'userid' + '\n email = '+ 'email' + '</body></html>'
