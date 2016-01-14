@@ -187,11 +187,11 @@ def get_mail_attachment(request):
 @csrf_exempt
 def authTokenCheck(request):
     idinfo = {}
-    if request.method == 'POST':
-        bulk_data = request.POST
-        try:
-            idinfo = client.verify_id_token(bulk_data['auth_token_from_Android'], SOCIAL_AUTH_GOOGLE_OAUTH2_KEY)
-            #If multiple clients access the backend server:
+    #if request.method == 'POST':
+    bulk_data = request.POST
+    try:
+        idinfo = client.verify_id_token(bulk_data['auth_token_from_Android'], SOCIAL_AUTH_GOOGLE_OAUTH2_KEY)
+        #If multiple clients access the backend server:
 #===============================================================================
 #             if idinfo['aud'] not in [ANDROID_CLIENT_ID, SOCIAL_AUTH_GOOGLE_OAUTH2_KEY]:
 #                 return HttpResponse('<html><body> aud error  </body></html>');
@@ -201,34 +201,33 @@ def authTokenCheck(request):
 #                 return HttpResponse('<html><body> iss error  </body></html>');
 #===============================================================================
 
-                #raise crypt.AppIdentityError("Wrong issuer.")
-            #==================================================================
-            # if idinfo['hd'] != APPS_DOMAIN_NAME:
-            #     raise crypt.AppIdentityError("Wrong hosted domain.")
-            #==================================================================
-        except crypt.AppIdentityError:
-        # Invalid token
-            return HttpResponse('<html><body>Invalid token: error</body></html>')
-        
-        #=======================================================================
-        # credentials = client.credentials_from_clientsecrets_and_code(
-        # CLIENT_SECRETS,
-        # ['profile'],
-        # bulk_data['auth_token_from_Android'])
-        # #https://www.googleapis.com/auth/gmail.readonly
-        # # Call Google API
-        # http_auth = credentials.authorize(httplib2.Http())
-        # #drive_service = discovery.build('drive', 'v3', http=http_auth)
-        #  
-        # # Get profile info from ID token
-        #=======================================================================
-        userid = '' #credentials.id_token['sub']
-        email = ''#credentials.id_token['email']
-         
-        html_cont = '<html><body>in test method = ' + str(request.method) + '\n post data = ' + str(idinfo) +'\n userID = '+'userid'
-        +'\n email = '+ 'email' + ' </body></html>'
-        return HttpResponse(html_cont)
+            #raise crypt.AppIdentityError("Wrong issuer.")
+        #==================================================================
+        # if idinfo['hd'] != APPS_DOMAIN_NAME:
+        #     raise crypt.AppIdentityError("Wrong hosted domain.")
+        #==================================================================
+    except crypt.AppIdentityError:
+    # Invalid token
+        return HttpResponse('<html><body>Invalid token: error</body></html>')
     
+    #=======================================================================
+    # credentials = client.credentials_from_clientsecrets_and_code(
+    # CLIENT_SECRETS,
+    # ['profile'],
+    # bulk_data['auth_token_from_Android'])
+    # #https://www.googleapis.com/auth/gmail.readonly
+    # # Call Google API
+    # http_auth = credentials.authorize(httplib2.Http())
+    # #drive_service = discovery.build('drive', 'v3', http=http_auth)
+    #  
+    # # Get profile info from ID token
+    #=======================================================================
+    userid = '' #credentials.id_token['sub']
+    email = ''#credentials.id_token['email']
+     
+    html_cont = '<html><body>in test method = ' + str(request.method) + '\n post data = ' + str(idinfo) +'\n userID = '+'userid'
+    +'\n email = '+ 'email' + ' </body></html>'
+    return HttpResponse(html_cont)
     return HttpResponse('<html><body>  </body></html>');
 
 #===============================================================================
