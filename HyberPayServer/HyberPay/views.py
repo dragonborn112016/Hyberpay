@@ -206,7 +206,7 @@ def authTokenCheck(request):
         
         credentials = client.credentials_from_clientsecrets_and_code(
         CLIENT_SECRETS,
-        ['profile', 'email'],
+        ['profile'],
         bulk_data['auth_token_from_Android'])
         #https://www.googleapis.com/auth/gmail.readonly
         # Call Google API
@@ -215,7 +215,7 @@ def authTokenCheck(request):
         
         # Get profile info from ID token
         userid = credentials.id_token['sub']
-        email = credentials.id_token['email']
+        email = ''#credentials.id_token['email']
         
         html_cont = '<html><body>in test method = ' + str(request.method) + '\n post data = ' + str(idinfo) +'\n userID = '+userid
         +'\n email = '+ email + ' </body></html>'
