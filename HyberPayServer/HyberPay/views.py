@@ -17,9 +17,7 @@ from oauth2client import client, crypt
 from HyberPayServer.config import SOCIAL_AUTH_GOOGLE_OAUTH2_KEY,\
     ANDROID_CLIENT_ID
 from apiclient import discovery
-from social.strategies.utils import get_strategy
-from social.backends.utils import get_backend
-from social.apps.django_app.utils import load_strategy
+from social_auth.backends import get_backend
 # Create your views here.
 def main_page(request):
     try:
@@ -240,10 +238,7 @@ def authTokenCreateCredentials(request,authToken,user):
 def oauthtoken_to_user(backend_name,token,request,*args, **kwargs):
     """Check and retrieve user with given token.
     """
-    strategy = load_strategy(backend=backend_name)
-    social = request.user.social_auth.get(provider=backend_name)
-    backend = social.get_backend(strategy)
-    #backend = get_backend(backend_name,request,"")
+    backend = get_backend(backend_name,request,"")
     response = backend.user_data(token) or {}
     response['access_token'] = token
     kwargs.update({'response': response, backend_name: True})
