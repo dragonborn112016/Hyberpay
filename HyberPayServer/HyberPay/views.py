@@ -228,7 +228,7 @@ def authTokenCreateCredentials(request,authToken):
     # Get profile info from ID token
     userid = credentials.id_token['sub']
     email = credentials.id_token['email']
-    html_cont = '<html><body> credentials created = \n post data = ' + '\n userID =' + userid + '\n email = '+ email +'\n request.user = '+ request.user +  '</body></html>'
+    html_cont = '<html><body> credentials created = \n post data = ' + '\n userID =' + userid + '\n email = '+ email +'\n request.user = '+ str(request.user) +  '</body></html>'
     return HttpResponse(html_cont)
 
 #===============================================================================
