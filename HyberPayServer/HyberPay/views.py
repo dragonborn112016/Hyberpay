@@ -204,23 +204,30 @@ def authTokenCheck(request):
         # Invalid token
             return HttpResponse('<html><body>Invalid token: error</body></html>')
          
-        credentials = client.credentials_from_clientsecrets_and_code(
-                        CLIENT_SECRETS,
-                        ['profile', 'email'],
-                        bulk_data['auth_token_from_Android'])
-        #https://www.googleapis.com/auth/gmail.readonly
-        # Call Google API
-        #http_auth = credentials.authorize(httplib2.Http())
-        #drive_service = discovery.build('drive', 'v3', http=http_auth)
-          
-        # Get profile info from ID token
-        userid = credentials.id_token['sub']
-        email = credentials.id_token['email']
-        
-        html_cont = '<html><body>in test method = ' + str(request.method) + '\n post data = ' + str(idinfo) + '\n userID =' + 'userid' + '\n email = '+ 'email' + '</body></html>'
-        return HttpResponse(html_cont)
+        try:
+            resp = authTokenCreateCredentials(request, idToken = bulk_data['auth_token_from_Android'])
+            return resp
+        except Exception :
+            html_cont = '<html><body>in test method = ' + str(request.method) + '\n post data = ' + str(idinfo) + '\n userID =' + 'userid' + '\n email = '+ 'email' + '</body></html>'
+            return HttpResponse(html_cont)
     
     return HttpResponse('<html><body>  </body></html>');
+
+def authTokenCreateCredentials(request,idToken):
+    credentials = client.credentials_from_clientsecrets_and_code(
+                        CLIENT_SECRETS,
+                        ['https://www.googleapis.com/auth/plus.profiles.read', 'email'],
+                        idToken)
+    #https://www.googleapis.com/auth/gmail.readonly
+    # Call Google API
+    http_auth = credentials.authorize(httplib2.Http())
+    #drive_service = discovery.build('drive', 'v3', http=http_auth)
+       
+    # Get profile info from ID token
+    userid = credentials.id_token['sub']
+    email = credentials.id_token['email']
+    html_cont = '<html><body>in test method = ' + str(request.method) + '\n post data = ' + '\n userID =' + userid + '\n email = '+ email + '</body></html>'
+    return HttpResponse(html_cont)
 
 #===============================================================================
 # def oauthtoken_to_user(backend_name,token,request,*args, **kwargs):
