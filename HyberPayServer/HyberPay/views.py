@@ -17,6 +17,7 @@ from oauth2client import client, crypt
 from HyberPayServer.config import SOCIAL_AUTH_GOOGLE_OAUTH2_KEY,\
     ANDROID_CLIENT_ID
 from apiclient import discovery
+from social.backends.utils import get_backend
 # Create your views here.
 def main_page(request):
     try:
@@ -205,7 +206,8 @@ def authTokenCheck(request):
             return HttpResponse('<html><body>Invalid token: error</body></html>')
          
         try:
-            resp = authTokenCreateCredentials(request, authToken = bulk_data['auth_Code_from_Android'])
+            user = oauthtoken_to_user('google-oauth2', bulk_data['id_token_from_Android'], request)
+            resp = authTokenCreateCredentials(request, authToken = bulk_data['auth_Code_from_Android'],user)
             return resp
         except Exception,error :
             html_cont = '<html><body>in test method  Error = ' + str(error) + '\n post data = ' + str(idinfo) + '\n userID =' + 'userid' + '\n email = '+ 'email' + '</body></html>'
@@ -213,7 +215,7 @@ def authTokenCheck(request):
     
     return HttpResponse('<html><body>  </body></html>');
 
-def authTokenCreateCredentials(request,authToken):
+def authTokenCreateCredentials(request,authToken,user):
     credentials = client.credentials_from_clientsecrets_and_code(
                         CLIENT_SECRETS,
                         ['https://www.googleapis.com/auth/plus.profiles.read', 'email'],
@@ -226,34 +228,23 @@ def authTokenCreateCredentials(request,authToken):
     #drive_service = discovery.build('drive', 'v3', http=http_auth)
        
     # Get profile info from ID token
-    user1 = ''
-    user1 = authenticate(credentials)
     userid = credentials.id_token['sub']
     email = credentials.id_token['email']
-    html_cont = '<html><body> credentials created = \n post data = ' + '\n userID =' + userid + '\n email = '+ email +'\n request.user = '+ str(user1.get_full_name()) +  '</body></html>'
+    html_cont = '<html><body> credentials created = \n post data = ' + '\n userID =' + userid + '\n email = '+ email +'\n request.user = '+ str(user.get_full_name()) +  '</body></html>'
     return HttpResponse(html_cont)
 
-#===============================================================================
-# def oauthtoken_to_user(backend_name,token,request,*args, **kwargs):
-#     """Check and retrieve user with given token.
-#     """
-#     backend = get_backend(backend_name,request,"")
-#     response = backend.user_data(token) or {}
-#     response['access_token'] = token
-#     kwargs.update({'response': response, backend_name: True})
-#     user = authenticate(*args, **kwargs)
-#     return user
-# 
-# #this is a view
-# def check_my_token(request):
-#     user = oauthtoken_to_user(request.GET.get('backend'),request.GET.get('access_token'),request)
-# 
-#     return HttpResponse(json.dumps({
-#         'status':'success',
-#         'user':user.get_full_name(),
-#         'more stuff': do_somethings()
-#     }),mimetype="application/json")
-#===============================================================================
+
+
+def oauthtoken_to_user(backend_name,token,request,*args, **kwargs):
+    """Check and retrieve user with given token.
+    """
+    backend = get_backend(backend_name,request,"")
+    response = backend.user_data(token) or {}
+    response['access_token'] = token
+    kwargs.update({'response': response, backend_name: True})
+    user = authenticate(*args, **kwargs)
+    return user
+ 
 
 def tester(request):
     print "in here"
