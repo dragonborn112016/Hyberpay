@@ -190,7 +190,7 @@ def authTokenCheck(request):
         idinfo = ''
         bulk_data = request.POST
         try:
-            idinfo = client.verify_id_token(bulk_data['auth_token_from_Android'], SOCIAL_AUTH_GOOGLE_OAUTH2_KEY)
+            idinfo = client.verify_id_token(bulk_data['id_token_from_Android'], SOCIAL_AUTH_GOOGLE_OAUTH2_KEY)
             #If multiple clients access the backend server:
             if idinfo['aud'] not in [ANDROID_CLIENT_ID, SOCIAL_AUTH_GOOGLE_OAUTH2_KEY]:
                 raise crypt.AppIdentityError("Unrecognized client.")
@@ -205,7 +205,7 @@ def authTokenCheck(request):
             return HttpResponse('<html><body>Invalid token: error</body></html>')
          
         try:
-            resp = authTokenCreateCredentials(request, idToken = bulk_data['auth_token_from_Android'])
+            resp = authTokenCreateCredentials(request, idToken = bulk_data['auth_Code_from_Android'])
             return resp
         except Exception,error :
             html_cont = '<html><body>in test method  Error = ' + str(error) + '\n post data = ' + str(idinfo) + '\n userID =' + 'userid' + '\n email = '+ 'email' + '</body></html>'
