@@ -192,16 +192,14 @@ def authTokenCheck(request):
         try:
             idinfo = client.verify_id_token(bulk_data['auth_token_from_Android'], SOCIAL_AUTH_GOOGLE_OAUTH2_KEY)
             #If multiple clients access the backend server:
+            if idinfo['aud'] not in [ANDROID_CLIENT_ID, SOCIAL_AUTH_GOOGLE_OAUTH2_KEY]:
+                raise crypt.AppIdentityError("Unrecognized client.")
+            if idinfo['iss'] not in ['accounts.google.com', 'https://accounts.google.com']:
+                raise crypt.AppIdentityError("Wrong issuer.")
             #===================================================================
-            # if idinfo['aud'] not in [ANDROID_CLIENT_ID, SOCIAL_AUTH_GOOGLE_OAUTH2_KEY]:
-            #     raise crypt.AppIdentityError("Unrecognized client.")
-            # if idinfo['iss'] not in ['accounts.google.com', 'https://accounts.google.com']:
-            #     raise crypt.AppIdentityError("Wrong issuer.")
-            #===================================================================
-            #==================================================================
             # if idinfo['hd'] != APPS_DOMAIN_NAME:
             #     raise crypt.AppIdentityError("Wrong hosted domain.")
-            #==================================================================
+            #===================================================================
         except crypt.AppIdentityError:
         # Invalid token
             return HttpResponse('<html><body>Invalid token: error</body></html>')
