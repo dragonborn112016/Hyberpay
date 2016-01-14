@@ -192,12 +192,14 @@ def authTokenCheck(request):
         try:
             idinfo = client.verify_id_token(bulk_data['auth_token_from_Android'], SOCIAL_AUTH_GOOGLE_OAUTH2_KEY)
             #If multiple clients access the backend server:
-            if idinfo['aud'] not in [ANDROID_CLIENT_ID, SOCIAL_AUTH_GOOGLE_OAUTH2_KEY]:
-                return HttpResponse('<html><body> aud error  </body></html>');
-
-                #raise crypt.AppIdentityError("Unrecognized client.")
-            if idinfo['iss'] not in ['accounts.google.com', 'https://accounts.google.com']:
-                return HttpResponse('<html><body> iss error  </body></html>');
+#===============================================================================
+#             if idinfo['aud'] not in [ANDROID_CLIENT_ID, SOCIAL_AUTH_GOOGLE_OAUTH2_KEY]:
+#                 return HttpResponse('<html><body> aud error  </body></html>');
+# 
+#                 #raise crypt.AppIdentityError("Unrecognized client.")
+#             if idinfo['iss'] not in ['accounts.google.com', 'https://accounts.google.com']:
+#                 return HttpResponse('<html><body> iss error  </body></html>');
+#===============================================================================
 
                 #raise crypt.AppIdentityError("Wrong issuer.")
             #==================================================================
@@ -223,8 +225,8 @@ def authTokenCheck(request):
         userid = '' #credentials.id_token['sub']
         email = ''#credentials.id_token['email']
          
-        html_cont = '<html><body>in test method = ' + str(request.method) + '\n post data = ' + str(idinfo) +'\n userID = '+userid
-        +'\n email = '+ email + ' </body></html>'
+        html_cont = '<html><body>in test method = ' + str(request.method) + '\n post data = ' + str(idinfo) +'\n userID = '+'userid'
+        +'\n email = '+ 'email' + ' </body></html>'
         return HttpResponse(html_cont)
     
     return HttpResponse('<html><body>  </body></html>');
