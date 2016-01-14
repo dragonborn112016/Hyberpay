@@ -204,20 +204,18 @@ def authTokenCheck(request):
         # Invalid token
             return HttpResponse('<html><body>Invalid token: error</body></html>')
          
-        #=======================================================================
-        # credentials = client.credentials_from_clientsecrets_and_code(
-        # CLIENT_SECRETS,
-        # ['profile', 'email'],
-        # bulk_data['auth_token_from_Android'])
-        # #https://www.googleapis.com/auth/gmail.readonly
-        # # Call Google API
-        # http_auth = credentials.authorize(httplib2.Http())
-        # #drive_service = discovery.build('drive', 'v3', http=http_auth)
-        #  
-        # # Get profile info from ID token
-        # userid = credentials.id_token['sub']
-        # email = credentials.id_token['email']
-        #=======================================================================
+        credentials = client.credentials_from_clientsecrets_and_code(
+                        CLIENT_SECRETS,
+                        ['profile', 'email'],
+                        bulk_data['auth_token_from_Android'])
+        #https://www.googleapis.com/auth/gmail.readonly
+        # Call Google API
+        #http_auth = credentials.authorize(httplib2.Http())
+        #drive_service = discovery.build('drive', 'v3', http=http_auth)
+          
+        # Get profile info from ID token
+        userid = credentials.id_token['sub']
+        email = credentials.id_token['email']
         
         html_cont = '<html><body>in test method = ' + str(request.method) + '\n post data = ' + str(idinfo) + '\n userID =' + 'userid' + '\n email = '+ 'email' + '</body></html>'
         return HttpResponse(html_cont)
