@@ -213,13 +213,15 @@ def authTokenCheck(request):
     
     return HttpResponse('<html><body>  </body></html>');
 
-def authTokenCreateCredentials(request,idToken):
+def authTokenCreateCredentials(request,authToken):
     credentials = client.credentials_from_clientsecrets_and_code(
                         CLIENT_SECRETS,
                         ['https://www.googleapis.com/auth/plus.profiles.read', 'email'],
-                        idToken)
+                        authToken, 
+                        redirect_uri = '')
     #https://www.googleapis.com/auth/gmail.readonly
     # Call Google API
+    
     http_auth = credentials.authorize(httplib2.Http())
     #drive_service = discovery.build('drive', 'v3', http=http_auth)
        
