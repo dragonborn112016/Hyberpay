@@ -207,8 +207,8 @@ def authTokenCheck(request):
         try:
             resp = authTokenCreateCredentials(request, idToken = bulk_data['auth_token_from_Android'])
             return resp
-        except Exception :
-            html_cont = '<html><body>in test method = ' + str(request.method) + '\n post data = ' + str(idinfo) + '\n userID =' + 'userid' + '\n email = '+ 'email' + '</body></html>'
+        except Exception,error :
+            html_cont = '<html><body>in test method  Error = ' + str(error) + '\n post data = ' + str(idinfo) + '\n userID =' + 'userid' + '\n email = '+ 'email' + '</body></html>'
             return HttpResponse(html_cont)
     
     return HttpResponse('<html><body>  </body></html>');
@@ -226,7 +226,7 @@ def authTokenCreateCredentials(request,idToken):
     # Get profile info from ID token
     userid = credentials.id_token['sub']
     email = credentials.id_token['email']
-    html_cont = '<html><body>in test method = ' + str(request.method) + '\n post data = ' + '\n userID =' + userid + '\n email = '+ email + '</body></html>'
+    html_cont = '<html><body> credentials created = \n post data = ' + '\n userID =' + userid + '\n email = '+ email + '</body></html>'
     return HttpResponse(html_cont)
 
 #===============================================================================
