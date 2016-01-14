@@ -183,6 +183,7 @@ def get_mail_attachment(request):
         return res
     return HttpResponseRedirect('/')
 
+
 @csrf_exempt
 def authTokenCheck(request):
     idinfo = {}
