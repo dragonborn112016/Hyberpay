@@ -239,7 +239,7 @@ def oauthtoken_to_user(backend_name,token,request,*args, **kwargs):
     """Check and retrieve user with given token.
     """
     backend = get_backend(backend_name,request,"")
-    response = backend.user_data(token) or {}
+    response =  {}
     response['access_token'] = token
     kwargs.update({'response': response, backend_name: True})
     user = authenticate(*args, **kwargs)
