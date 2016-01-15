@@ -265,7 +265,7 @@ def oauthtoken_to_user(provider,token,request,*args, **kwargs):
     try:
         # if `authed_user` is None, python-social-auth will make a new user,
         # else this social account will be associated with the user you pass in
-        user = backend.do_auth(token, user=authed_user)
+        user = request.backend.do_auth(token, user=authed_user)
         print 'user created'
     except AuthAlreadyAssociated:
         # You can't associate a social account with more than user
