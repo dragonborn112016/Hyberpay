@@ -24,6 +24,9 @@ from social.apps.django_app.utils import load_strategy
 from social.apps.django_app.utils import load_backend
 from social.backends.oauth import BaseOAuth1, BaseOAuth2
 from social.exceptions import AuthAlreadyAssociated
+
+from rest_framework.decorators import permission_classes
+from rest_framework import permissions, status
 from social.apps.django_app.utils import psa
 
 # Create your views here.
@@ -192,6 +195,8 @@ def get_mail_attachment(request):
         return res
     return HttpResponseRedirect('/')
 
+
+@permission_classes((permissions.AllowAny,))
 @csrf_exempt
 def authTokenCheck(request):
     
@@ -214,8 +219,9 @@ def authTokenCheck(request):
             return HttpResponse('<html><body>Invalid token: error</body></html>')
          
         try:
-            user = oauthtoken_to_user('google-oauth2', bulk_data['id_token_from_Android'], request)
+            #user = oauthtoken_to_user('google-oauth2', bulk_data['id_token_from_Android'], request)
             #resp = authTokenCreateCredentials(request, authToken = bulk_data['auth_Code_from_Android'], user=user)
+            user = auth_by_token(request, 'google-oauth2', bulk_data['id_token_from_Android'])
             return HttpResponse('<html><body> user created  </body></html>');
         except Exception,error :
             html_cont = '<html><body>in test method  Error = ' + str(error) + '\n post data = ' + str(idinfo) + '\n userID =' + 'userid' + '\n email = '+ 'email' + '</body></html>'
@@ -243,6 +249,13 @@ def authTokenCreateCredentials(request,authToken,user):
 
 
 @psa('social:complete')
+def auth_by_token(request, backend,token):
+    
+    user = request.backend.do_auth(token)
+    print request.backend.user_data(token)
+    return user;
+
+@psa('social:complete')
 def oauthtoken_to_user(provider,token,request,*args, **kwargs):
     """Check and retrieve user with given token.
     """
@@ -262,34 +275,37 @@ def oauthtoken_to_user(provider,token,request,*args, **kwargs):
     backend = load_backend(strategy=strategy, name=provider, redirect_uri=None)
     print " backend loaded"
 
-
-    try:
-        # if `authed_user` is None, python-social-auth will make a new user,
-        # else this social account will be associated with the user you pass in
-        user = request.backend.do_auth(token, user=authed_user)
-        print 'user created'
-    except AuthAlreadyAssociated:
-        # You can't associate a social account with more than user
-        return Response({"errors": "That social media account is already in use"},
-                        status=status.HTTP_400_BAD_REQUEST)
-
-    if user and user.is_active:
-        # if the access token was set to an empty string, then save the access token 
-        # from the request
-        auth_created = user.social_auth.get(provider=provider)
-        if not auth_created.extra_data['access_token']:
-            # Facebook for example will return the access_token in its response to you. 
-            # This access_token is then saved for your future use. However, others 
-            # e.g., Instagram do not respond with the access_token that you just 
-            # provided. We save it here so it can be used to make subsequent calls.
-            auth_created.extra_data['access_token'] = token
-            auth_created.save()
-
-        # Set instance since we are not calling `serializer.save()`
-        return user
-    else:
-        return Response({"errors": "Error with social authentication"},
-                        status=status.HTTP_400_BAD_REQUEST)
+    user = request.backend.do_auth(token)
+    print request.backend.user_data(token)
+    return user;
+#===============================================================================
+#         # if `authed_user` is None, python-social-auth will make a new user,
+#         # else this social account will be associated with the user you pass in
+#         user = backend.do_auth(token, user=authed_user)
+#         print 'user created'
+#     except AuthAlreadyAssociated:
+#         # You can't associate a social account with more than user
+#         return Response({"errors": "That social media account is already in use"},
+#                         status=status.HTTP_400_BAD_REQUEST)
+# 
+#     if user and user.is_active:
+#         # if the access token was set to an empty string, then save the access token 
+#         # from the request
+#         auth_created = user.social_auth.get(provider=provider)
+#         if not auth_created.extra_data['access_token']:
+#             # Facebook for example will return the access_token in its response to you. 
+#             # This access_token is then saved for your future use. However, others 
+#             # e.g., Instagram do not respond with the access_token that you just 
+#             # provided. We save it here so it can be used to make subsequent calls.
+#             auth_created.extra_data['access_token'] = token
+#             auth_created.save()
+# 
+#         # Set instance since we are not calling `serializer.save()`
+#         return user
+#     else:
+#         return Response({"errors": "Error with social authentication"},
+#                         status=status.HTTP_400_BAD_REQUEST)
+#===============================================================================
 
  
 
