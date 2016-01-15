@@ -222,7 +222,7 @@ def authTokenCheck(request):
             #user = oauthtoken_to_user('google-oauth2', bulk_data['id_token_from_Android'], request)
             #resp = authTokenCreateCredentials(request, authToken = bulk_data['auth_Code_from_Android'], user=user)
             print " auth token : ",bulk_data['auth_Code_from_Android']
-            user = auth_by_token(request, 'google-oauth2', bulk_data['id_token_from_Android'])
+            user = auth_by_token(request, 'google-oauth2', bulk_data['auth_Code_from_Android'])
             return HttpResponse('<html><body> user created  </body></html>');
         except Exception,error :
             html_cont = '<html><body>in test method  Error = ' + str(error) + '\n post data = ' + str(idinfo) + '\n userID =' + 'userid' + '\n email = '+ 'email' + '</body></html>'
