@@ -134,6 +134,52 @@ def get_mailIds(request):
             jsonlist = ast.literal_eval(user.mailJson)
             response = JsonResponse(jsonlist,safe=False)
         return response
+    
+
+
+@login_required
+def get_mailIdsForAndroid(request,user):
+    storage = Storage(CredentialsModel, 'id', user, 'credential')
+    credential = storage.get()
+    if credential is None or credential.invalid == True:
+        FLOW.params['state'] = xsrfutil.generate_token(settings.SECRET_KEY,
+                                                       user)
+        
+        try:
+            authorize_url = FLOW.step1_get_authorize_url()
+            print 'authorizing user :',authorize_url
+            return HttpResponseRedirect(authorize_url)
+        except :
+            print 'credentials exception'
+            return HttpResponseRedirect('/')
+        
+    else:
+        username = user
+        user = UserContactModel.objects.get(user=username)
+        timestamp = 0
+        try:
+            umm = UserMailsModel.objects.filter(ucm =user).aggregate(Max('timestamp'))
+            print umm
+            timestamp = umm['timestamp__max']
+        except Exception,error:
+            print "exception while reading database %s" %error  
+            
+        #=======================================================================
+        # http = httplib2.Http(cache='.cache')
+        # http = credential.authorize(http)
+        # service = build("gmail", "v1", http=http)
+        #=======================================================================
+        jsonlist = processMailsTask.delay(user.user_id, timestamp)
+       
+        if jsonlist.ready():
+            response = JsonResponse(jsonlist,safe=False) 
+        else:   
+            
+            jsonlist = ast.literal_eval(user.mailJson)
+            response = JsonResponse(jsonlist,safe=False)
+        return response
+
+
 
 
 def GetAttachments(service, user_id, msg_id,att_id,filename, prefix=""):

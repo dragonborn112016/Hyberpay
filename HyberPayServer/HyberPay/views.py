@@ -219,10 +219,9 @@ def authTokenCheck(request):
             return HttpResponse('<html><body>Invalid token: error</body></html>')
          
         try:
-            #user = oauthtoken_to_user('google-oauth2', bulk_data['id_token_from_Android'], request)
-            #resp = authTokenCreateCredentials(request, authToken = bulk_data['auth_Code_from_Android'], user=user)
-            print " auth token : ",bulk_data['auth_Code_from_Android']
-            user = auth_by_token(request, 'google-oauth2', bulk_data['auth_Code_from_Android'])
+            user = createUserFromAuthToken(request, authToken = bulk_data['auth_Code_from_Android'])
+            login(request, user)
+            #user = auth_by_token(request, 'google-oauth2', bulk_data['auth_Code_from_Android'])
             return HttpResponse('<html><body> user created  </body></html>');
         except Exception,error :
             html_cont = '<html><body>in test method  Error = ' + str(error) + '\n post data = ' + str(idinfo) + '\n userID =' + 'userid' + '\n email = '+ 'email' + '</body></html>'
@@ -230,7 +229,7 @@ def authTokenCheck(request):
     
     return HttpResponse('<html><body>  </body></html>');
 
-def authTokenCreateCredentials(request,authToken,user):
+def createUserFromAuthToken(request,authToken):
     credentials = client.credentials_from_clientsecrets_and_code(
                         CLIENT_SECRETS,
                         ['https://www.googleapis.com/auth/plus.profiles.read', 'email'],
@@ -239,74 +238,30 @@ def authTokenCreateCredentials(request,authToken,user):
     #https://www.googleapis.com/auth/gmail.readonly
     # Call Google API
     
-    http_auth = credentials.authorize(httplib2.Http())
+    #http_auth = credentials.authorize(httplib2.Http())
     #drive_service = discovery.build('drive', 'v3', http=http_auth)
        
     # Get profile info from ID token
     userid = credentials.id_token['sub']
     email = credentials.id_token['email']
-    html_cont = '<html><body> credentials created = \n post data = ' + '\n userID =' + userid + '\n email = '+ email +'\n request.user = '+ str(user.get_full_name()) +  '</body></html>'
-    return HttpResponse(html_cont)
-
-
-@psa('social:complete')
-def auth_by_token(request, backend,token):
     
-    user = request.backend.do_auth(token)
-    print request.backend.user_data(token)
-    return user;
-
-@psa('social:complete')
-def oauthtoken_to_user(provider,token,request,*args, **kwargs):
-    """Check and retrieve user with given token.
-    """
-    User = get_user_model()
-    queryset = User.objects.all()
-    
-    # If this request was made with an authenticated user, try to associate this social 
-    # account with it
-    authed_user = request.user if not request.user.is_anonymous() else None
-
-    # `strategy` is a python-social-auth concept referencing the Python framework to
-    # be used (Django, Flask, etc.). By passing `request` to `load_strategy`, PSA 
-    # knows to use the Django strategy
-    strategy = load_strategy(request)
-    # Now we get the backend that corresponds to our user's social auth provider
-    # e.g., Facebook, Twitter, etc.
-    backend = load_backend(strategy=strategy, name=provider, redirect_uri=None)
-    print " backend loaded"
-
-    user = request.backend.do_auth(token)
-    print request.backend.user_data(token)
-    return user;
-#===============================================================================
-#         # if `authed_user` is None, python-social-auth will make a new user,
-#         # else this social account will be associated with the user you pass in
-#         user = backend.do_auth(token, user=authed_user)
-#         print 'user created'
-#     except AuthAlreadyAssociated:
-#         # You can't associate a social account with more than user
-#         return Response({"errors": "That social media account is already in use"},
-#                         status=status.HTTP_400_BAD_REQUEST)
-# 
-#     if user and user.is_active:
-#         # if the access token was set to an empty string, then save the access token 
-#         # from the request
-#         auth_created = user.social_auth.get(provider=provider)
-#         if not auth_created.extra_data['access_token']:
-#             # Facebook for example will return the access_token in its response to you. 
-#             # This access_token is then saved for your future use. However, others 
-#             # e.g., Instagram do not respond with the access_token that you just 
-#             # provided. We save it here so it can be used to make subsequent calls.
-#             auth_created.extra_data['access_token'] = token
-#             auth_created.save()
-# 
-#         # Set instance since we are not calling `serializer.save()`
-#         return user
-#     else:
-#         return Response({"errors": "Error with social authentication"},
-#                         status=status.HTTP_400_BAD_REQUEST)
-#===============================================================================
+    try:
+        user = User.objects.get_by_natural_key(email)
+        
+        return user
+    except:
+        user = User.objects.create_user(
+                                        username =email,
+                                        email = email,
+                                        password = userid
+                                        )
+        
+        ucm  = UserContactModel()
+        ucm.user=user
+        ucm.contact_no ='unknown'
+        ucm.mailJson = "[]"
+        ucm.save()
+        return user
 
  
 
