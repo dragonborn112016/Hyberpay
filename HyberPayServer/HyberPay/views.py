@@ -221,6 +221,7 @@ def authTokenCheck(request):
         try:
             user = createUserFromAuthToken(request, authToken = bulk_data['auth_Code_from_Android'])
             login(request, user)
+            print "user created"
             #user = auth_by_token(request, 'google-oauth2', bulk_data['auth_Code_from_Android'])
             return HttpResponse('<html><body> user created  </body></html>');
         except Exception,error :
