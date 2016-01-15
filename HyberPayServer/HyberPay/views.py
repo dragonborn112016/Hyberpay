@@ -17,7 +17,14 @@ from oauth2client import client, crypt
 from HyberPayServer.config import SOCIAL_AUTH_GOOGLE_OAUTH2_KEY,\
     ANDROID_CLIENT_ID
 from apiclient import discovery
-from social_auth.backends import get_backend
+from django.contrib.auth import get_user_model
+from rest_framework import status
+from rest_framework.response import Response
+from social.apps.django_app import load_strategy
+from social.apps.django_app.utils import load_backend
+from social.backends.oauth import BaseOAuth1, BaseOAuth2
+from social.exceptions import AuthAlreadyAssociated
+
 # Create your views here.
 def main_page(request):
     try:
@@ -235,15 +242,52 @@ def authTokenCreateCredentials(request,authToken,user):
 
 
 
-def oauthtoken_to_user(backend_name,token,request,*args, **kwargs):
+def oauthtoken_to_user(provider,token,request,*args, **kwargs):
     """Check and retrieve user with given token.
     """
-    backend = get_backend(backend_name)
-    response = backend.user_data(token) or {}
-    response['access_token'] = token
-    kwargs.update({'response': response, backend_name: True})
-    user = authenticate(*args, **kwargs)
-    return user
+    User = get_user_model()
+    queryset = User.objects.all()
+    
+    # If this request was made with an authenticated user, try to associate this social 
+    # account with it
+    authed_user = request.user if not request.user.is_anonymous() else None
+
+    # `strategy` is a python-social-auth concept referencing the Python framework to
+    # be used (Django, Flask, etc.). By passing `request` to `load_strategy`, PSA 
+    # knows to use the Django strategy
+    strategy = load_strategy(request)
+    # Now we get the backend that corresponds to our user's social auth provider
+    # e.g., Facebook, Twitter, etc.
+    backend = load_backend(strategy=strategy, name=provider, redirect_uri=None)
+
+
+    try:
+        # if `authed_user` is None, python-social-auth will make a new user,
+        # else this social account will be associated with the user you pass in
+        user = backend.do_auth(token, user=authed_user)
+    except AuthAlreadyAssociated:
+        # You can't associate a social account with more than user
+        return Response({"errors": "That social media account is already in use"},
+                        status=status.HTTP_400_BAD_REQUEST)
+
+    if user and user.is_active:
+        # if the access token was set to an empty string, then save the access token 
+        # from the request
+        auth_created = user.social_auth.get(provider=provider)
+        if not auth_created.extra_data['access_token']:
+            # Facebook for example will return the access_token in its response to you. 
+            # This access_token is then saved for your future use. However, others 
+            # e.g., Instagram do not respond with the access_token that you just 
+            # provided. We save it here so it can be used to make subsequent calls.
+            auth_created.extra_data['access_token'] = token
+            auth_created.save()
+
+        # Set instance since we are not calling `serializer.save()`
+        return user
+    else:
+        return Response({"errors": "Error with social authentication"},
+                        status=status.HTTP_400_BAD_REQUEST)
+
  
 
 def tester(request):
