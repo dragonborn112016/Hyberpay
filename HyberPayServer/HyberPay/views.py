@@ -259,12 +259,14 @@ def oauthtoken_to_user(provider,token,request,*args, **kwargs):
     # Now we get the backend that corresponds to our user's social auth provider
     # e.g., Facebook, Twitter, etc.
     backend = load_backend(strategy=strategy, name=provider, redirect_uri=None)
+    print " backend loaded"
 
 
     try:
         # if `authed_user` is None, python-social-auth will make a new user,
         # else this social account will be associated with the user you pass in
         user = backend.do_auth(token, user=authed_user)
+        print 'user created'
     except AuthAlreadyAssociated:
         # You can't associate a social account with more than user
         return Response({"errors": "That social media account is already in use"},
