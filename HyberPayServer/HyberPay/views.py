@@ -18,16 +18,6 @@ from HyberPayServer.config import SOCIAL_AUTH_GOOGLE_OAUTH2_KEY,\
     ANDROID_CLIENT_ID
 from apiclient import discovery
 from django.contrib.auth import get_user_model
-from rest_framework import status
-from rest_framework.response import Response
-from social.apps.django_app.utils import load_strategy
-from social.apps.django_app.utils import load_backend
-from social.backends.oauth import BaseOAuth1, BaseOAuth2
-from social.exceptions import AuthAlreadyAssociated
-
-from rest_framework.decorators import permission_classes
-from rest_framework import permissions, status
-from social.apps.django_app.utils import psa
 
 # Create your views here.
 def main_page(request):
@@ -196,7 +186,6 @@ def get_mail_attachment(request):
     return HttpResponseRedirect('/')
 
 
-@permission_classes((permissions.AllowAny,))
 @csrf_exempt
 def authTokenCheck(request):
     
@@ -220,7 +209,7 @@ def authTokenCheck(request):
          
         try:
             user = createUserFromAuthToken(request, authToken = bulk_data['auth_Code_from_Android'])
-            login(request, user)
+            #login(request, user)
             print "user created"
             #user = auth_by_token(request, 'google-oauth2', bulk_data['auth_Code_from_Android'])
             return HttpResponse('<html><body> user created  </body></html>');
