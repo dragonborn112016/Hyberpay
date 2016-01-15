@@ -20,7 +20,7 @@ from apiclient import discovery
 from django.contrib.auth import get_user_model
 from rest_framework import status
 from rest_framework.response import Response
-from social.apps.django_app import load_strategy
+from social.apps.django_app.utils import load_strategy
 from social.apps.django_app.utils import load_backend
 from social.backends.oauth import BaseOAuth1, BaseOAuth2
 from social.exceptions import AuthAlreadyAssociated

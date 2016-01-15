@@ -14,7 +14,6 @@ https://docs.djangoproject.com/en/1.8/ref/settings/
 import os
 from config import *
 import djcelery
-import rest_social_auth
 djcelery.setup_loader()
 import dj_database_url
 
@@ -56,9 +55,6 @@ INSTALLED_APPS = (
     'HyberPay',
     'social.apps.django_app.default',
     'djcelery',
-    'rest_framework',
-    'rest_framework.authtoken',
-    'rest_social_auth',
     
 )
 
@@ -106,17 +102,17 @@ WSGI_APPLICATION = 'HyberPayServer.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/1.8/ref/settings/#databases
-
 #===============================================================================
+# 
 # DATABASES = {
 #     'default': {
 #         'ENGINE': 'django.db.backends.sqlite3',
 #         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
 #     }
 # }
+#  
 #===============================================================================
 #===============================================================================
-# 
 # DATABASES = {
 #     'default': {
 #         'ENGINE': 'django.db.backends.postgresql_psycopg2',
@@ -129,12 +125,13 @@ WSGI_APPLICATION = 'HyberPayServer.wsgi.application'
 # }
 #===============================================================================
 
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2'
     }
 }
- 
+  
 DATABASES['default'] =  dj_database_url.config()
 
 # Honor the 'X-Forwarded-Proto' header for request.is_secure()
