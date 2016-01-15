@@ -24,6 +24,7 @@ from social.apps.django_app.utils import load_strategy
 from social.apps.django_app.utils import load_backend
 from social.backends.oauth import BaseOAuth1, BaseOAuth2
 from social.exceptions import AuthAlreadyAssociated
+from social.apps.django_app.utils import psa
 
 # Create your views here.
 def main_page(request):
@@ -241,7 +242,7 @@ def authTokenCreateCredentials(request,authToken,user):
     return HttpResponse(html_cont)
 
 
-
+@psa('social:complete')
 def oauthtoken_to_user(provider,token,request,*args, **kwargs):
     """Check and retrieve user with given token.
     """
