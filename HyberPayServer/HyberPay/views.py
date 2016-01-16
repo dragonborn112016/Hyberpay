@@ -224,46 +224,42 @@ def authTokenCheck(request):
     
     return HttpResponse('<html><body>  </body></html>');
 
-def checkGmailScope(request,authToken):
-    credential = client.credentials_from_clientsecrets_and_code(
-                         CLIENT_SECRETS,
-                         ['https://mail.google.com/'],
-                         authToken, 
-                         redirect_uri = '')
-    http = httplib2.Http(cache='.cache')
-    http = credential.authorize(http)
-    service = build("gmail", "v1", http=http)
-    response = service.users().messages().list(userId='me').execute()
-    return HttpResponse('<html><body>credential created</body></html>')
+# def checkGmailScope(request,authToken):
+#     credential = client.credentials_from_clientsecrets_and_code(
+#                          CLIENT_SECRETS,
+#                          ['https://mail.google.com/'],
+#                          authToken, 
+#                          redirect_uri = '')
+#     http = httplib2.Http(cache='.cache')
+#     http = credential.authorize(http)
+#     service = build("gmail", "v1", http=http)
+#     response = service.users().messages().list(userId='me').execute()
+#     return HttpResponse('<html><body>credential created</body></html>')
 
-def createUserFromAuthToken(request,idToken):
-    
-    #http_auth = credentials.authorize(httplib2.Http())
-    #drive_service = discovery.build('drive', 'v3', http=http_auth)
-       
-    # Get profile info from ID token
-    userid = idToken['sub']
-    email = idToken['email']
-    
-    try:
-        user = User.objects.get_by_natural_key(email)        
-        return user
-    except:
-        user = User.objects.create_user(
-                                        username =email,
-                                        email = email,
-                                        password = userid
-                                        )
-        
-        ucm  = UserContactModel()
-        ucm.user=user
-        ucm.contact_no ='unknown'
-        ucm.mailJson = "[]"
-        ucm.save()
-        return user
+# def createUserFromAuthToken(request,idToken):
+#     
+#     #http_auth = credentials.authorize(httplib2.Http())
+#     #drive_service = discovery.build('drive', 'v3', http=http_auth)
+#        
+#     # Get profile info from ID token
+#     userid = idToken['sub']
+#     email = idToken['email']
+#     
+#     try:
+#         user = User.objects.get_by_natural_key(email)        
+#         return user
+#     except:
+#         user = User.objects.create_user(
+#                                         username =email,
+#                                         email = email,
+#                                         password = userid
+#                                         )
+#         
+#         ucm  = UserContactModel()
+#         ucm.user=user
+#         ucm.contact_no ='unknown'
+#         ucm.mailJson = "[]"
+#         ucm.save()
+#         return user
 
  
-
-def tester(request):
-    print "in here"
-    return HttpResponse('<html><body>in test</body></html>')
