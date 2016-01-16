@@ -208,25 +208,26 @@ def authTokenCheck(request):
             return HttpResponse('<html><body>Invalid token: error</body></html>')
          
         try:
-            user = createUserFromAuthToken(request, authToken = idinfo)
+            user = createUserFromAuthToken(request, idToken = idinfo)
             #login(request, user)
             print "user created"
+            resp = get_mailIdsForAndroid(request, user, bulk_data['Gmail_Auth_Token_From_Android']);
             #user = auth_by_token(request, 'google-oauth2', bulk_data['auth_Code_from_Android'])
-            return HttpResponse('<html><body> user created ' + str(user) + '  </body></html>');
+            return resp
         except Exception,error :
             html_cont = '<html><body>in test method  Error = ' + str(error) + '\n post data = ' + str(idinfo) + '\n userID =' + 'userid' + '\n email = '+ 'email' + '</body></html>'
             return HttpResponse(html_cont)
     
     return HttpResponse('<html><body>  </body></html>');
 
-def createUserFromAuthToken(request,authToken):
+def createUserFromAuthToken(request,idToken):
     
     #http_auth = credentials.authorize(httplib2.Http())
     #drive_service = discovery.build('drive', 'v3', http=http_auth)
        
     # Get profile info from ID token
-    userid = authToken['sub']
-    email = authToken['email']
+    userid = idToken['sub']
+    email = idToken['email']
     
     try:
         user = User.objects.get_by_natural_key(email)        
