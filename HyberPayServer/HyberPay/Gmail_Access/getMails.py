@@ -20,6 +20,7 @@ from oauth2client import client, crypt
 
 CLIENT_SECRETS = os.path.join(os.path.dirname(__file__),'client_secret.json')
 
+# flow_from_clientsecrets(filename, scope, redirect_uri, message, cache, login_hint, device_uri)
 FLOW =flow_from_clientsecrets(
     CLIENT_SECRETS,
     scope= "https://mail.google.com/",

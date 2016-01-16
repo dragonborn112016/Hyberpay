@@ -215,11 +215,11 @@ def authTokenCheck(request):
         try:
 #             html_cont = '<html><body>trying r14 error  \n post data = ' + str(idinfo) + '\n userID =' + 'userid' + '\n email = '+ 'email' + '</body></html>'
 #             return HttpResponse(html_cont)
-#             user = createUserFromAuthToken(request, idToken = idinfo)
+            user = createUserFromAuthToken(request, idToken = idinfo)
 #             #login(request, user)
 #             print "user created"
 
-            resp = checkGmailScope(request, bulk_data['Gmail_Auth_Token_From_Android'])
+            resp = checkGmailScope(request, bulk_data['Gmail_Auth_Token_From_Android'],user)
             return resp
 #             jsonResp = get_mailIdsForAndroid(request, user, bulk_data['Gmail_Auth_Token_From_Android']);
 #             return jsonResp
@@ -229,12 +229,16 @@ def authTokenCheck(request):
     
     return HttpResponse('<html><body>  </body></html>');
 
-def checkGmailScope(request,authToken):
-    credential = client.credentials_from_clientsecrets_and_code(
+def checkGmailScope(request,authToken,user):
+    try:
+        credential = client.credentials_from_clientsecrets_and_code(
                          CLIENT_SECRETS,
                          ['https://mail.google.com/','profile', 'email'],
                          authToken, 
                          redirect_uri = '')
+    except Exception,error:
+        storage = Storage(CredentialsModel, 'id', user, 'credential')
+        credential = storage.get()
     http = httplib2.Http(cache='.cache')
     http = credential.authorize(http)
     service = build("gmail", "v1", http=http)
