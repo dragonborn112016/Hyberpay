@@ -229,7 +229,7 @@ def createUserFromAuthToken(request,authToken):
     email = authToken['email']
     
     try:
-        user = User.objects.get(email= email)        
+        user = User.objects.get_by_natural_key(email)        
         return user
     except:
         user = User.objects.create_user(
