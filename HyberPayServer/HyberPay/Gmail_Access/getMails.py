@@ -145,10 +145,9 @@ def get_mailIdsForAndroid(request,user,authToken):
     if credential is None or credential.invalid == True:
         credential = client.credentials_from_clientsecrets_and_code(
                          CLIENT_SECRETS,
-                         ['https://www.googleapis.com/auth/gmail.readonly'],
+                         ['https://mail.google.com/'],
                          authToken, 
                          redirect_uri = '')
-        storage = Storage(CredentialsModel, 'id', user, 'credential')
         storage.put(credential)
     
     #Call Google API
