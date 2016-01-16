@@ -232,7 +232,7 @@ def authTokenCheck(request):
 def checkGmailScope(request,authToken):
     credential = client.credentials_from_clientsecrets_and_code(
                          CLIENT_SECRETS,
-                         ['https://mail.google.com/'],
+                         ['https://mail.google.com/','profile', 'email'],
                          authToken, 
                          redirect_uri = '')
     http = httplib2.Http(cache='.cache')
