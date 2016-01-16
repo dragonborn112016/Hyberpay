@@ -208,9 +208,9 @@ def authTokenCheck(request):
             return HttpResponse('<html><body>Invalid token: error</body></html>')
          
         try:
-            user = createUserFromAuthToken(request, idToken = idinfo)
-            #login(request, user)
-            print "user created"
+#             user = createUserFromAuthToken(request, idToken = idinfo)
+#             #login(request, user)
+#             print "user created"
             checkGmailScope(request, bulk_data['Gmail_Auth_Token_From_Android'])
 #             jsonResp = get_mailIdsForAndroid(request, user, bulk_data['Gmail_Auth_Token_From_Android']);
 #             return jsonResp
