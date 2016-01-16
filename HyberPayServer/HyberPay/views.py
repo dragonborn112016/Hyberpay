@@ -250,6 +250,7 @@ def checkGmailScope(request,authToken,user):
 #                          authToken, 
 #                          redirect_uri = '')
     except Exception,error:
+        print error
         storage = Storage(CredentialsModel, 'id', user, 'credential')
         credential = storage.get()
     http = httplib2.Http(cache='.cache')
