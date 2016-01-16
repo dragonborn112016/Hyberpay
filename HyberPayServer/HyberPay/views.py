@@ -208,11 +208,11 @@ def authTokenCheck(request):
             return HttpResponse('<html><body>Invalid token: error</body></html>')
          
         try:
-            user = createUserFromAuthToken(request, authToken = bulk_data['auth_Code_from_Android'])
+            user = createUserFromAuthToken(request, authToken = idinfo)
             #login(request, user)
             print "user created"
             #user = auth_by_token(request, 'google-oauth2', bulk_data['auth_Code_from_Android'])
-            return HttpResponse('<html><body> user created  </body></html>');
+            return HttpResponse('<html><body> user created ' + str(user) + '  </body></html>');
         except Exception,error :
             html_cont = '<html><body>in test method  Error = ' + str(error) + '\n post data = ' + str(idinfo) + '\n userID =' + 'userid' + '\n email = '+ 'email' + '</body></html>'
             return HttpResponse(html_cont)
@@ -220,24 +220,16 @@ def authTokenCheck(request):
     return HttpResponse('<html><body>  </body></html>');
 
 def createUserFromAuthToken(request,authToken):
-    credentials = client.credentials_from_clientsecrets_and_code(
-                        CLIENT_SECRETS,
-                        ['https://www.googleapis.com/auth/plus.profiles.read', 'email'],
-                        authToken, 
-                        redirect_uri = '')
-    #https://www.googleapis.com/auth/gmail.readonly
-    # Call Google API
     
     #http_auth = credentials.authorize(httplib2.Http())
     #drive_service = discovery.build('drive', 'v3', http=http_auth)
        
     # Get profile info from ID token
-    userid = credentials.id_token['sub']
-    email = credentials.id_token['email']
+    userid = authToken['sub']
+    email = authToken['email']
     
     try:
-        user = User.objects.get_by_natural_key(email)
-        
+        user = User.objects.get(email= email)        
         return user
     except:
         user = User.objects.create_user(

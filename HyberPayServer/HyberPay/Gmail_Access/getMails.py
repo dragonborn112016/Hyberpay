@@ -15,6 +15,7 @@ from django.db.models import Max
 #from django.template.context import RequestContext
 from HyberPay.tasks import processMailsTask
 import ast
+from oauth2client import client, crypt
 
 
 CLIENT_SECRETS = os.path.join(os.path.dirname(__file__),'client_secret.json')
@@ -137,21 +138,24 @@ def get_mailIds(request):
     
 
 
-@login_required
-def get_mailIdsForAndroid(request,user):
+
+def get_mailIdsForAndroid(request,user,authToken):
     storage = Storage(CredentialsModel, 'id', user, 'credential')
     credential = storage.get()
     if credential is None or credential.invalid == True:
-        FLOW.params['state'] = xsrfutil.generate_token(settings.SECRET_KEY,
-                                                       user)
-        
-        try:
-            authorize_url = FLOW.step1_get_authorize_url()
-            print 'authorizing user :',authorize_url
-            return HttpResponseRedirect(authorize_url)
-        except :
-            print 'credentials exception'
-            return HttpResponseRedirect('/')
+        credential = client.credentials_from_clientsecrets_and_code(
+                         CLIENT_SECRETS,
+                         ['https://www.googleapis.com/auth/gmail.readonly'],
+                         authToken, 
+                         redirect_uri = '')
+        storage = Storage(CredentialsModel, 'id', user, 'credential')
+        storage.put(credential)
+    
+    #Call Google API
+    
+    #http_auth = credentials.authorize(httplib2.Http())
+    #drive_service = discovery.build('drive', 'v3', http=http_auth)
+       
         
     else:
         username = user
