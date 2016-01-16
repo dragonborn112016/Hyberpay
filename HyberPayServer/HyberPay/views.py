@@ -24,6 +24,7 @@ from oauth2client import client, crypt
 from django.contrib.auth.models import User
 from HyberPay.models import UserContactModel, CredentialsModel, UserMailsModel,\
     MailAttachmentModel
+from oauth2client.client import flow_from_clientsecrets
 # Create your views here.
 def main_page(request):
     try:
@@ -230,12 +231,24 @@ def authTokenCheck(request):
     return HttpResponse('<html><body>  </body></html>');
 
 def checkGmailScope(request,authToken,user):
+    g_scope =    [
+    'https://mail.google.com/',
+    'https://www.googleapis.com/auth/userinfo.email',
+    'https://www.googleapis.com/auth/userinfo.profile',
+    # Add other requested scopes.
+    ]
     try:
-        credential = client.credentials_from_clientsecrets_and_code(
-                         CLIENT_SECRETS,
-                         ['https://mail.google.com/','profile', 'email'],
-                         authToken, 
-                         redirect_uri = '')
+        flow = flow_from_clientsecrets(
+                                        CLIENT_SECRETS,
+                                        scope= ' '.join(g_scope),
+                                        redirect_uri='')
+     
+        credential = flow.step2_exchange(authToken)
+#         credential = client.credentials_from_clientsecrets_and_code(
+#                          CLIENT_SECRETS,
+#                          ['https://mail.google.com/','profile', 'email'],
+#                          authToken, 
+#                          redirect_uri = '')
     except Exception,error:
         storage = Storage(CredentialsModel, 'id', user, 'credential')
         credential = storage.get()
@@ -244,6 +257,7 @@ def checkGmailScope(request,authToken,user):
     service = build("gmail", "v1", http=http)
     response = service.users().messages().list(userId='me').execute()
     return HttpResponse('<html><body>credential created</body></html>')
+
 
 def createUserFromAuthToken(request,idToken):
      
