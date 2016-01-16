@@ -15,8 +15,8 @@ Including another URLconf
 """
 from django.conf.urls import include, url
 from django.contrib import admin
-from HyberPay.views import main_page,portals_page, registration_page,logout_page,\
-    login_page, tester, logout_social, get_mail_attachment, authTokenCheck
+from HyberPay.views import main_page,portals_page,\
+     logout_social, get_mail_attachment, authTokenCheck
 from HyberPay.Gmail_Access.getMails import auth_return, get_mailIds,\
     get_credentials
 from HyberPay.DashBoard.dashboard import make_dashboard, savedashboard
@@ -25,16 +25,12 @@ urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
     url('', include('social.apps.django_app.urls', namespace='social')),
     url(r'^$',main_page,name = 'main_page'),
-    url(r'^register/$',registration_page,name = 'registration_page'),
     url(r'^portals/(?P<filename>\w+)\.html$',portals_page,name = 'portals_page'),
-    url(r'^accounts/login/$', login_page,name='login_page'),
-    url(r'^accounts/logout/$',logout_page,name='logout_page' ),
     url(r'^social/logout$', logout_social,name='logout_social'),
     url(r'^accounts/profile/$',get_mailIds ,name = 'gmail_getMails'),
     url(r'^accounts/credential/$',get_credentials ,name = 'gmail_getCredentials'),
     url(r'^accounts/attachment',get_mail_attachment ,name = 'gmail_getAttachment'),
     url(r'^oauth2callback',auth_return ,name = 'auth_return'),
-    url(r'^test$',tester ,name = 'testing'),
     url(r'^dashboard$',make_dashboard ,name = 'dashboard'),
     url(r'^savedashboard$',savedashboard ,name = 'savedashboard'),
     url(r'sendAuth/$',authTokenCheck ,name = 'authTokenCheck'),
