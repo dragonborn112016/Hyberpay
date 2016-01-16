@@ -138,49 +138,49 @@ def get_mailIds(request):
     
 
 
-# 
-# def get_mailIdsForAndroid(request,user,authToken):
-#     storage = Storage(CredentialsModel, 'id', user, 'credential')
-#     credential = storage.get()
-#     if credential is None or credential.invalid == True:
-#         credential = client.credentials_from_clientsecrets_and_code(
-#                          CLIENT_SECRETS,
-#                          ['https://mail.google.com/'],
-#                          authToken, 
-#                          redirect_uri = '')
-#         storage.put(credential)
-#     
-#     #Call Google API
-#     
-#     #http_auth = credentials.authorize(httplib2.Http())
-#     #drive_service = discovery.build('drive', 'v3', http=http_auth)
-#        
-#         
-#     else:
-#         username = user
-#         user = UserContactModel.objects.get(user=username)
-#         timestamp = 0
-#         try:
-#             umm = UserMailsModel.objects.filter(ucm =user).aggregate(Max('timestamp'))
-#             print umm
-#             timestamp = umm['timestamp__max']
-#         except Exception,error:
-#             print "exception while reading database %s" %error  
-#             
-#         #=======================================================================
-#         # http = httplib2.Http(cache='.cache')
-#         # http = credential.authorize(http)
-#         # service = build("gmail", "v1", http=http)
-#         #=======================================================================
-#         jsonlist = processMailsTask.delay(user.user_id, timestamp)
-#        
-#         if jsonlist.ready():
-#             response = JsonResponse(jsonlist,safe=False) 
-#         else:   
-#             
-#             jsonlist = ast.literal_eval(user.mailJson)
-#             response = JsonResponse(jsonlist,safe=False)
-#         return response
+ 
+def get_mailIdsForAndroid(request,user,authToken):
+    storage = Storage(CredentialsModel, 'id', user, 'credential')
+    credential = storage.get()
+    if credential is None or credential.invalid == True:
+        credential = client.credentials_from_clientsecrets_and_code(
+                         CLIENT_SECRETS,
+                         ['https://mail.google.com/'],
+                         authToken, 
+                         redirect_uri = '')
+        storage.put(credential)
+     
+    #Call Google API
+     
+    #http_auth = credentials.authorize(httplib2.Http())
+    #drive_service = discovery.build('drive', 'v3', http=http_auth)
+        
+         
+    else:
+        username = user
+        user = UserContactModel.objects.get(user=username)
+        timestamp = 0
+        try:
+            umm = UserMailsModel.objects.filter(ucm =user).aggregate(Max('timestamp'))
+            print umm
+            timestamp = umm['timestamp__max']
+        except Exception,error:
+            print "exception while reading database %s" %error  
+             
+        #=======================================================================
+        # http = httplib2.Http(cache='.cache')
+        # http = credential.authorize(http)
+        # service = build("gmail", "v1", http=http)
+        #=======================================================================
+        jsonlist = processMailsTask.delay(user.user_id, timestamp)
+        
+        if jsonlist.ready():
+            response = JsonResponse(jsonlist,safe=False) 
+        else:   
+             
+            jsonlist = ast.literal_eval(user.mailJson)
+            response = JsonResponse(jsonlist,safe=False)
+        return response
 
 
 
