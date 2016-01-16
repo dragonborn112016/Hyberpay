@@ -214,8 +214,8 @@ def authTokenCheck(request):
 #             #login(request, user)
 #             print "user created"
 
-            resp = checkGmailScope(request, bulk_data['Gmail_Auth_Token_From_Android'])
-            return resp
+#             resp = checkGmailScope(request, bulk_data['Gmail_Auth_Token_From_Android'])
+#             return resp
 #             jsonResp = get_mailIdsForAndroid(request, user, bulk_data['Gmail_Auth_Token_From_Android']);
 #             return jsonResp
         except Exception,error :
