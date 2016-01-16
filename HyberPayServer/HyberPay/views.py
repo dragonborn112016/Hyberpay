@@ -1,11 +1,10 @@
-from django.contrib.auth import logout, login, authenticate
-from django.http.response import HttpResponse
+from django.http.response import HttpResponse, HttpResponseRedirect,\
+    JsonResponse
 from django.template.context import RequestContext
 from django.template.loader import get_template
 
-from HyberPay.Gmail_Access.getMails import *
-from HyberPay.forms import *
-from HyberPay.models import *
+# from HyberPay.Gmail_Access.getMails import *
+# from HyberPay.models import *
 from django.shortcuts import render_to_response, redirect
 from django.contrib.auth import logout as auth_logout
 from fileinput import filename
@@ -13,12 +12,17 @@ import httplib2
 from apiclient.discovery import build
 from django.views.decorators.csrf import csrf_exempt
 import json
-from oauth2client import client, crypt
+# from oauth2client import client, crypt
 from HyberPayServer.config import SOCIAL_AUTH_GOOGLE_OAUTH2_KEY,\
     ANDROID_CLIENT_ID
-from apiclient import discovery
-from django.contrib.auth import get_user_model
-
+from HyberPay.Gmail_Access.getMails import get_credentials, GetAttachments
+from oauth2client.django_orm import Storage
+from HyberPayServer import settings
+import os
+from oauth2client import client, crypt
+from django.contrib.auth.models import User
+from HyberPay.models import UserContactModel, CredentialsModel, UserMailsModel,\
+    MailAttachmentModel
 # Create your views here.
 def main_page(request):
     try:
@@ -60,99 +64,99 @@ def portals_page(request,filename):
     output = template.render()
     return HttpResponse(output);
 
-def registration_page(request):
-    if request.method == 'POST':
-        form = RegistrationForm(request.POST)
-        if form.is_valid():
-            username =form.cleaned_data['email_id']
-            try:
-                User.objects.get_by_natural_key(username)
-                errors = "EmailId already exists"
-                variables = RequestContext(request,{
-                     'form':form,
-                     'errors':errors
-                     }) 
-                return render_to_response('registration/registration.html', variables)
-            except:
-                user = User.objects.create_user(
-                                                username =form.cleaned_data['email_id'],
-                                                email = form.cleaned_data['email_id'],
-                                                password = form.cleaned_data['password2']
-                                                )
-                
-                ucm  = UserContactModel()
-                ucm.user=user
-                ucm.user.first_name=form.cleaned_data['first_name']
-                ucm.user.last_name =form.cleaned_data['last_name']
-                ucm.contact_no =form.cleaned_data['contact_no']
-                ucm.save()
-                return HttpResponseRedirect('/') # redirect to success page indicating user profile created
-        # also may be can send a verification link later
-        else:
-            variables = RequestContext(request,{
-                 'form':form
-                 }) 
-            return render_to_response('registration/registration.html', variables)
-            
-    
-    else:
-        form = RegistrationForm()
-        variables = RequestContext(request,{
-                     'form':form
-                     }) 
-        return render_to_response('registration/registration.html', variables)
+# def registration_page(request):
+#     if request.method == 'POST':
+#         form = RegistrationForm(request.POST)
+#         if form.is_valid():
+#             username =form.cleaned_data['email_id']
+#             try:
+#                 User.objects.get_by_natural_key(username)
+#                 errors = "EmailId already exists"
+#                 variables = RequestContext(request,{
+#                      'form':form,
+#                      'errors':errors
+#                      }) 
+#                 return render_to_response('registration/registration.html', variables)
+#             except:
+#                 user = User.objects.create_user(
+#                                                 username =form.cleaned_data['email_id'],
+#                                                 email = form.cleaned_data['email_id'],
+#                                                 password = form.cleaned_data['password2']
+#                                                 )
+#                 
+#                 ucm  = UserContactModel()
+#                 ucm.user=user
+#                 ucm.user.first_name=form.cleaned_data['first_name']
+#                 ucm.user.last_name =form.cleaned_data['last_name']
+#                 ucm.contact_no =form.cleaned_data['contact_no']
+#                 ucm.save()
+#                 return HttpResponseRedirect('/') # redirect to success page indicating user profile created
+#         # also may be can send a verification link later
+#         else:
+#             variables = RequestContext(request,{
+#                  'form':form
+#                  }) 
+#             return render_to_response('registration/registration.html', variables)
+#             
+#     
+#     else:
+#         form = RegistrationForm()
+#         variables = RequestContext(request,{
+#                      'form':form
+#                      }) 
+#         return render_to_response('registration/registration.html', variables)
+# 
+# 
+# #for hyberpay
+# def login_page(request):
+#     if request.method == 'POST':
+#         form = LoginForm(request.POST)
+#         if form.is_valid():
+#             
+#             username = form.cleaned_data['username']
+#             password = form.cleaned_data['password']
+#             user = authenticate(username=username, password=password)
+#             if user is not None:
+#                 if user.is_active:
+#                     login(request, user)
+#                     # do something here : maybe needed in future
+#                     nexturl = request.POST['next']
+#                     nxturls=[""," ",None];
+#                     if nexturl in nxturls:
+#                         return HttpResponseRedirect('../profile')
+#                     else:
+#                         return HttpResponseRedirect(nexturl)
+#                     
+#                 else:
+#                     # Return a 'disabled account' error message
+#                     errors = "disabled account"
+#                     variables = RequestContext(request,{
+#                                                         'form':form ,
+#                                                         'errors':errors
+#                                                         }) 
+#                     return render_to_response('registration/login.html', variables)
+# 
+#                    
+#             else:
+#                 # Return an 'invalid login' error message.
+#                 errors = "invalid Login"
+#                 variables = RequestContext(request,{
+#                                                      'form':form ,
+#                                                      'errors':errors
+#                                                      }) 
+#                 return render_to_response('registration/login.html', variables)
+#             
+#     form = LoginForm()
+#     variables = RequestContext(request,{
+#                      'form':form
+#                      }) 
+#     return render_to_response('registration/login.html', variables)
 
 
-#for hyberpay
-def login_page(request):
-    if request.method == 'POST':
-        form = LoginForm(request.POST)
-        if form.is_valid():
-            
-            username = form.cleaned_data['username']
-            password = form.cleaned_data['password']
-            user = authenticate(username=username, password=password)
-            if user is not None:
-                if user.is_active:
-                    login(request, user)
-                    # do something here : maybe needed in future
-                    nexturl = request.POST['next']
-                    nxturls=[""," ",None];
-                    if nexturl in nxturls:
-                        return HttpResponseRedirect('../profile')
-                    else:
-                        return HttpResponseRedirect(nexturl)
-                    
-                else:
-                    # Return a 'disabled account' error message
-                    errors = "disabled account"
-                    variables = RequestContext(request,{
-                                                        'form':form ,
-                                                        'errors':errors
-                                                        }) 
-                    return render_to_response('registration/login.html', variables)
-
-                   
-            else:
-                # Return an 'invalid login' error message.
-                errors = "invalid Login"
-                variables = RequestContext(request,{
-                                                     'form':form ,
-                                                     'errors':errors
-                                                     }) 
-                return render_to_response('registration/login.html', variables)
-            
-    form = LoginForm()
-    variables = RequestContext(request,{
-                     'form':form
-                     }) 
-    return render_to_response('registration/login.html', variables)
-
-
-#for hyberpay
-def logout_page(request):
-    logout(request)
-    return HttpResponseRedirect('/')
+# #for hyberpay
+# def logout_page(request):
+#     logout(request)
+#     return HttpResponseRedirect('/')
 
 # for social apps
 def logout_social(request):
