@@ -234,25 +234,22 @@ def checkGmailScope(request,authToken,user):
     g_scope =    [
     'https://mail.google.com/',
     'https://www.googleapis.com/auth/userinfo.email',
-    'https://www.googleapis.com/auth/userinfo.profile',
+    'https://www.googleapis.com/auth/userinfo.profile'
     # Add other requested scopes.
     ]
-    try:
-        flow = flow_from_clientsecrets(
-                                        CLIENT_SECRETS,
-                                        scope= ' '.join(g_scope),
-                                        redirect_uri='')
-     
-        credential = flow.step2_exchange(authToken)
+    
+    flow = flow_from_clientsecrets(
+                                    CLIENT_SECRETS,
+                                    scope= ' '.join(g_scope),
+                                    redirect_uri='')
+ 
+    credential = flow.step2_exchange(authToken)
 #         credential = client.credentials_from_clientsecrets_and_code(
 #                          CLIENT_SECRETS,
 #                          ['https://mail.google.com/','profile', 'email'],
 #                          authToken, 
 #                          redirect_uri = '')
-    except Exception,error:
-        print error
-        storage = Storage(CredentialsModel, 'id', user, 'credential')
-        credential = storage.get()
+    
     http = httplib2.Http(cache='.cache')
     http = credential.authorize(http)
     service = build("gmail", "v1", http=http)
