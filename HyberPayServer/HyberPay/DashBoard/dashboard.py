@@ -13,10 +13,8 @@ from HyberPay.DashBoard.dashboard_utility import get_monthly_expense, IND_OTHERS
     
 
     
-def make_dashboard(request):
-    username = request.user
+def make_dashboard(request,username):
     user = UserContactModel.objects.get(user = username)
-    
     umm = UserMailsModel.objects.filter(ucm = user)
     for_months =4;
     month_dic = get_monthly_expense(umm,for_months)

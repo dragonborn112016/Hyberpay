@@ -16,7 +16,7 @@ import json
 from HyberPayServer.config import SOCIAL_AUTH_GOOGLE_OAUTH2_KEY,\
     ANDROID_CLIENT_ID
 from HyberPay.Gmail_Access.getMails import get_credentials, GetAttachments,\
-    get_mailIdsForAndroid, createUserFromAuthToken
+    get_mailIdsForAndroid, createUserFromAuthToken, get_mailJson
 from oauth2client.django_orm import Storage
 from HyberPayServer import settings
 import os
@@ -24,6 +24,7 @@ from oauth2client import client, crypt
 from django.contrib.auth.models import User
 from HyberPay.models import UserContactModel, CredentialsModel, UserMailsModel,\
     MailAttachmentModel
+from HyberPay.DashBoard.dashboard import make_dashboard
 # Create your views here.
 def main_page(request):
     try:
@@ -218,10 +219,16 @@ def authTokenCheck(request):
             user = createUserFromAuthToken(idToken = idinfo)
 #             #login(request, user)
             print "user created", user.get_full_name()
+            if bulk_data['Get_Dashboard'] == '1':
+                jsonResp = make_dashboard(request, user);
+            elif bulk_data['Get_Mails'] == '1':
+                jsonResp = get_mailIdsForAndroid(request, user, bulk_data['Gmail_Auth_Token_From_Android']);
+            else :
+                jsonResp = get_mailJson(request, user);
 
 #             resp = generateCredentialsFromAuthToken(request, bulk_data['Gmail_Auth_Token_From_Android'],user)
 #             return resp
-            jsonResp = get_mailIdsForAndroid(request, user, bulk_data['Gmail_Auth_Token_From_Android']);
+            
             return jsonResp
         except Exception,error :
             html_cont = '<html><body>in test method  Error = ' + str(error) + '\n post data = ' + str(idinfo) + '\n userID =' + 'userid' + '\n email = '+ 'email' + '</body></html>'

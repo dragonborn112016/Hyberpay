@@ -174,7 +174,12 @@ def get_mailIdsForAndroid(request,user,authToken):
         response = JsonResponse(jsonlist,safe=False)
     return response
 
-
+def get_mailJson(request, user):
+    username = user
+    user = UserContactModel.objects.get(user=username)
+    jsonlist = ast.literal_eval(user.mailJson)
+    response = JsonResponse(jsonlist,safe=False)
+    return response
 
 
 def GetAttachments(service, user_id, msg_id,att_id,filename, prefix=""):
