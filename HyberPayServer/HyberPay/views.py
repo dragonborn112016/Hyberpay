@@ -218,7 +218,7 @@ def authTokenCheck(request):
 #             return HttpResponse(html_cont)
             user = createUserFromAuthToken(request, idToken = idinfo)
 #             #login(request, user)
-#             print "user created"
+            print "user created", user.get_full_name()
 
             resp = checkGmailScope(request, bulk_data['Gmail_Auth_Token_From_Android'],user)
             return resp
@@ -240,7 +240,7 @@ def checkGmailScope(request,authToken,user):
     
     flow = flow_from_clientsecrets(
                                     CLIENT_SECRETS,
-                                    scope= ' '.join(g_scope),
+                                    scope= "https://mail.google.com https://mail.google.com/ https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/plus.me https://www.googleapis.com/auth/userinfo.profile",
                                     redirect_uri='')
  
     credential = flow.step2_exchange(authToken)
