@@ -103,12 +103,12 @@ WSGI_APPLICATION = 'HyberPayServer.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/1.8/ref/settings/#databases
  
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-    }
-}
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+#     }
+# }
   
 # DATABASES = {
 #     'default': {
@@ -122,13 +122,13 @@ DATABASES = {
 # }
 
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.postgresql_psycopg2'
-#     }
-# }
-#   
-# DATABASES['default'] =  dj_database_url.config()
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql_psycopg2'
+    }
+}
+   
+DATABASES['default'] =  dj_database_url.config()
 
 SOCIAL_AUTH_PIPELINE = (
     'social.pipeline.social_auth.social_details',
