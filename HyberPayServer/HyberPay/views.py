@@ -244,7 +244,7 @@ def checkGmailScope(request,authToken,user):
      
         credential = flow.step2_exchange(authToken)
         storage.put(credential)
-    elif credential.access_token_expired() == True:
+    else:
         print "refreshing access token"
         http = httplib2.Http(cache='.cache')
         credential.get_access_token(http)
