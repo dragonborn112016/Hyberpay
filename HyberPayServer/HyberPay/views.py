@@ -234,8 +234,9 @@ def checkGmailScope(request,authToken,user):
     
     storage = Storage(CredentialsModel, 'id', user, 'credential')
     credential = storage.get()
-    if credential is None or credential.invalid == True:
-    
+    if credential is None :
+        
+        print " recreating credentials"    
         flow = flow_from_clientsecrets(
                                         CLIENT_SECRETS,
                                         scope= "https://mail.google.com https://mail.google.com/ https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/plus.me https://www.googleapis.com/auth/userinfo.profile",
@@ -243,6 +244,12 @@ def checkGmailScope(request,authToken,user):
      
         credential = flow.step2_exchange(authToken)
         storage.put(credential)
+    elif credential.access_token_expired() == True:
+        print "refreshing access token"
+        http = httplib2.Http(cache='.cache')
+        credential.get_access_token(http)
+        storage.put(credential)
+        
 #         credential = client.credentials_from_clientsecrets_and_code(
 #                          CLIENT_SECRETS,
 #                          ['https://mail.google.com/','profile', 'email'],
