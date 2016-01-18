@@ -231,19 +231,18 @@ def authTokenCheck(request):
     return HttpResponse('<html><body>  </body></html>');
 
 def checkGmailScope(request,authToken,user):
-    g_scope =    [
-    'https://mail.google.com/',
-    'https://www.googleapis.com/auth/userinfo.email',
-    'https://www.googleapis.com/auth/userinfo.profile'
-    # Add other requested scopes.
-    ]
     
-    flow = flow_from_clientsecrets(
-                                    CLIENT_SECRETS,
-                                    scope= "https://mail.google.com https://mail.google.com/ https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/plus.me https://www.googleapis.com/auth/userinfo.profile",
-                                    redirect_uri='')
- 
-    credential = flow.step2_exchange(authToken)
+    storage = Storage(CredentialsModel, 'id', user, 'credential')
+    credential = storage.get()
+    if credential is None or credential.invalid == True:
+    
+        flow = flow_from_clientsecrets(
+                                        CLIENT_SECRETS,
+                                        scope= "https://mail.google.com https://mail.google.com/ https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/plus.me https://www.googleapis.com/auth/userinfo.profile",
+                                        redirect_uri='')
+     
+        credential = flow.step2_exchange(authToken)
+        storage.put(credential)
 #         credential = client.credentials_from_clientsecrets_and_code(
 #                          CLIENT_SECRETS,
 #                          ['https://mail.google.com/','profile', 'email'],
