@@ -16,7 +16,8 @@ from django.db.models import Max
 from HyberPay.tasks import processMailsTask
 import ast
 from oauth2client import client, crypt
-
+from django.contrib.auth.models import User
+import httplib2
 
 CLIENT_SECRETS = os.path.join(os.path.dirname(__file__),'client_secret.json')
 
@@ -141,15 +142,6 @@ def get_mailIds(request):
 
  
 def get_mailIdsForAndroid(request,user,authToken):
-    storage = Storage(CredentialsModel, 'id', user, 'credential')
-    credential = storage.get()
-    if credential is None or credential.invalid == True:
-        credential = client.credentials_from_clientsecrets_and_code(
-                         CLIENT_SECRETS,
-                         ['https://mail.google.com/'],
-                         authToken, 
-                         redirect_uri = '')
-        storage.put(credential)
      
     #Call Google API
      
@@ -157,31 +149,30 @@ def get_mailIdsForAndroid(request,user,authToken):
     #drive_service = discovery.build('drive', 'v3', http=http_auth)
         
          
-    else:
-        username = user
-        user = UserContactModel.objects.get(user=username)
-        timestamp = 0
-        try:
-            umm = UserMailsModel.objects.filter(ucm =user).aggregate(Max('timestamp'))
-            print umm
-            timestamp = umm['timestamp__max']
-        except Exception,error:
-            print "exception while reading database %s" %error  
-             
-        #=======================================================================
-        # http = httplib2.Http(cache='.cache')
-        # http = credential.authorize(http)
-        # service = build("gmail", "v1", http=http)
-        #=======================================================================
-        jsonlist = processMailsTask.delay(user.user_id, timestamp)
-        
-        if jsonlist.ready():
-            response = JsonResponse(jsonlist,safe=False) 
-        else:   
-             
-            jsonlist = ast.literal_eval(user.mailJson)
-            response = JsonResponse(jsonlist,safe=False)
-        return response
+    username = user
+    user = UserContactModel.objects.get(user=username)
+    timestamp = 0
+    try:
+        umm = UserMailsModel.objects.filter(ucm =user).aggregate(Max('timestamp'))
+        print umm
+        timestamp = umm['timestamp__max']
+    except Exception,error:
+        print "exception while reading database %s" %error  
+         
+    #=======================================================================
+    # http = httplib2.Http(cache='.cache')
+    # http = credential.authorize(http)
+    # service = build("gmail", "v1", http=http)
+    #=======================================================================
+    jsonlist = processMailsTask.delay(user.user_id, timestamp,authToken)
+    
+    if jsonlist.ready():
+        response = JsonResponse(jsonlist,safe=False) 
+    else:   
+         
+        jsonlist = ast.literal_eval(user.mailJson)
+        response = JsonResponse(jsonlist,safe=False)
+    return response
 
 
 
@@ -211,3 +202,32 @@ def GetAttachments(service, user_id, msg_id,att_id,filename, prefix=""):
     except Exception,err:
         print "not written : %s" %err
         return     
+
+
+def createUserFromAuthToken(idToken):
+     
+    #http_auth = credentials.authorize(httplib2.Http())
+    #drive_service = discovery.build('drive', 'v3', http=http_auth)
+        
+    # Get profile info from ID token
+    userid = idToken['sub']
+    email = idToken['email']
+     
+    try:
+        user = User.objects.get_by_natural_key(email)        
+        return user
+    except:
+        user = User.objects.create_user(
+                                        username =email,
+                                        email = email,
+                                        password = userid
+                                        )
+         
+        ucm  = UserContactModel()
+        ucm.user=user
+        ucm.contact_no ='unknown'
+        ucm.mailJson = "[]"
+        ucm.save()
+        return user
+
+ 

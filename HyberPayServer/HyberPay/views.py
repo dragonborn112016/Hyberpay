@@ -16,7 +16,7 @@ import json
 from HyberPayServer.config import SOCIAL_AUTH_GOOGLE_OAUTH2_KEY,\
     ANDROID_CLIENT_ID
 from HyberPay.Gmail_Access.getMails import get_credentials, GetAttachments,\
-    CLIENT_SECRETS
+    get_mailIdsForAndroid, createUserFromAuthToken
 from oauth2client.django_orm import Storage
 from HyberPayServer import settings
 import os
@@ -24,7 +24,6 @@ from oauth2client import client, crypt
 from django.contrib.auth.models import User
 from HyberPay.models import UserContactModel, CredentialsModel, UserMailsModel,\
     MailAttachmentModel
-from oauth2client.client import flow_from_clientsecrets
 # Create your views here.
 def main_page(request):
     try:
@@ -216,77 +215,17 @@ def authTokenCheck(request):
         try:
 #             html_cont = '<html><body>trying r14 error  \n post data = ' + str(idinfo) + '\n userID =' + 'userid' + '\n email = '+ 'email' + '</body></html>'
 #             return HttpResponse(html_cont)
-            user = createUserFromAuthToken(request, idToken = idinfo)
+            user = createUserFromAuthToken(idToken = idinfo)
 #             #login(request, user)
             print "user created", user.get_full_name()
 
-            resp = checkGmailScope(request, bulk_data['Gmail_Auth_Token_From_Android'],user)
-            return resp
-#             jsonResp = get_mailIdsForAndroid(request, user, bulk_data['Gmail_Auth_Token_From_Android']);
-#             return jsonResp
+#             resp = generateCredentialsFromAuthToken(request, bulk_data['Gmail_Auth_Token_From_Android'],user)
+#             return resp
+            jsonResp = get_mailIdsForAndroid(request, user, bulk_data['Gmail_Auth_Token_From_Android']);
+            return jsonResp
         except Exception,error :
             html_cont = '<html><body>in test method  Error = ' + str(error) + '\n post data = ' + str(idinfo) + '\n userID =' + 'userid' + '\n email = '+ 'email' + '</body></html>'
             return HttpResponse(html_cont)
     
     return HttpResponse('<html><body>  </body></html>');
 
-def checkGmailScope(request,authToken,user):
-    
-    storage = Storage(CredentialsModel, 'id', user, 'credential')
-    credential = storage.get()
-    if credential is None :
-        
-        print " recreating credentials"    
-        flow = flow_from_clientsecrets(
-                                        CLIENT_SECRETS,
-                                        scope= "https://mail.google.com https://mail.google.com/ https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/plus.me https://www.googleapis.com/auth/userinfo.profile",
-                                        redirect_uri='')
-     
-        credential = flow.step2_exchange(authToken)
-        storage.put(credential)
-    else:
-        print "refreshing access token"
-        http = httplib2.Http(cache='.cache')
-        credential.get_access_token(http)
-        storage.put(credential)
-        
-#         credential = client.credentials_from_clientsecrets_and_code(
-#                          CLIENT_SECRETS,
-#                          ['https://mail.google.com/','profile', 'email'],
-#                          authToken, 
-#                          redirect_uri = '')
-    
-    http = httplib2.Http(cache='.cache')
-    http = credential.authorize(http)
-    service = build("gmail", "v1", http=http)
-    response = service.users().messages().list(userId='me').execute()
-    return HttpResponse('<html><body>credential created</body></html>')
-
-
-def createUserFromAuthToken(request,idToken):
-     
-    #http_auth = credentials.authorize(httplib2.Http())
-    #drive_service = discovery.build('drive', 'v3', http=http_auth)
-        
-    # Get profile info from ID token
-    userid = idToken['sub']
-    email = idToken['email']
-     
-    try:
-        user = User.objects.get_by_natural_key(email)        
-        return user
-    except:
-        user = User.objects.create_user(
-                                        username =email,
-                                        email = email,
-                                        password = userid
-                                        )
-         
-        ucm  = UserContactModel()
-        ucm.user=user
-        ucm.contact_no ='unknown'
-        ucm.mailJson = "[]"
-        ucm.save()
-        return user
-
- 

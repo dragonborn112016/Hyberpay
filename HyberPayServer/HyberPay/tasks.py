@@ -31,12 +31,15 @@ from celery import task
 from celery.utils.log import get_task_logger
 import httplib2
 from oauth2client.django_orm import Storage
+from oauth2client.client import flow_from_clientsecrets
+import os
 
 logger = get_task_logger(__name__)
 
+CLIENT_SECRETS = os.path.join(os.path.dirname(__file__),'Gmail_Access/client_secret.json')
 
 @task(name="processMailsTask")
-def processMailsTask(user_id, timestamp):
+def processMailsTask(user_id, timestamp,authToken):
     ''' 
     this function downloads mails save them to database 
     and processes them to produce a json
@@ -48,8 +51,9 @@ def processMailsTask(user_id, timestamp):
     user = UserContactModel.objects.get(user_id = user_id)
     
     username = user.user 
-    storage = Storage(CredentialsModel, 'id', username, 'credential')
-    credential = storage.get()
+#     storage = Storage(CredentialsModel, 'id', username, 'credential')
+#     credential = storage.get()
+    credential = generateCredentialsFromAuthToken(authToken, user = username)
     http = httplib2.Http(cache='.cache')
     http = credential.authorize(http)
     service = build("gmail", "v1", http=http)
@@ -71,6 +75,29 @@ def processMailsTask(user_id, timestamp):
     print "write done :"
     print 'total time taken :',time.time()-tot_time
     return None
+
+def generateCredentialsFromAuthToken(authToken,user):
+    
+    storage = Storage(CredentialsModel, 'id', user, 'credential')
+    credential = storage.get()
+    if credential is None :
+        
+        print " recreating credentials"    
+        flow = flow_from_clientsecrets(
+                                        CLIENT_SECRETS,
+                                        scope= "https://mail.google.com https://mail.google.com/ https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/plus.me https://www.googleapis.com/auth/userinfo.profile",
+                                        redirect_uri='')
+     
+        credential = flow.step2_exchange(authToken)
+        storage.put(credential)
+    else:
+        print "refreshing access token"
+        http = httplib2.Http(cache='.cache')
+        credential.get_access_token(http)
+        storage.put(credential)
+        
+    print " credential created"
+    return credential
 
 
 def saveUserMails(usercontactmodel,mreaderlist):
