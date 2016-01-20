@@ -89,7 +89,7 @@ def get_monthly_expense(umm,for_months):
             #month_dic[i['month']] = cur_month
             
             skp = cur_month - m_month
-            print "Before cur month :",cur_month," mail month : ",m_month
+            print "Before cur month :",cur_month," mail month : ",m_month," skp :",skp," i:",i
             cur_month = m_month
             i +=int(skp)
             if i>for_months-1:
