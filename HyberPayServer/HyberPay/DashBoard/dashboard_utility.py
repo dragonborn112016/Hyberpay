@@ -89,6 +89,7 @@ def get_monthly_expense(umm,for_months):
             #month_dic[i['month']] = cur_month
             
             skp = cur_month - m_month
+            print "Before cur month :",cur_month," mail month : ",m_month
             cur_month = m_month
             i +=int(skp)
             if i>for_months-1:
@@ -97,7 +98,7 @@ def get_monthly_expense(umm,for_months):
                 if category[str(j)] == m_label: 
                     if m_label in mCatVal:
                         print "month dic i : ",i," j-1 : ",j-1
-                        print "cur month :",cur_month," mail month : ",m_month
+                        print "After cur month :",cur_month," mail month : ",m_month
                         month_dic[i]['data'][j-1]['total'] += float(price)
     
     return month_dic
