@@ -220,10 +220,13 @@ def authTokenCheck(request):
 #             #login(request, user)
             print "user created", user.get_full_name()
             if bulk_data['Get_Dashboard'] == '1':
+                print " get dashboard"
                 jsonResp = make_dashboard(request, user);
             elif bulk_data['Get_Mails'] == '1':
+                print " get mails"
                 jsonResp = get_mailIdsForAndroid(request, user, bulk_data['Gmail_Auth_Token_From_Android']);
             else :
+                print " get mails from db"
                 jsonResp = get_mailJson(request, user);
 
 #             resp = generateCredentialsFromAuthToken(request, bulk_data['Gmail_Auth_Token_From_Android'],user)
