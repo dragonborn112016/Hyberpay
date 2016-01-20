@@ -91,6 +91,8 @@ def get_monthly_expense(umm,for_months):
             skp = cur_month - m_month
             print "Before cur month :",cur_month," mail month : ",m_month," skp :",skp," i:",i
             cur_month = m_month
+            if skp < 0:
+                skp += 12
             i +=int(skp)
             if i>for_months-1:
                 break
