@@ -96,6 +96,7 @@ def get_monthly_expense(umm,for_months):
             for j in xrange(len(mCatKeys)):
                 if category[str(j)] == m_label: 
                     if m_label in mCatVal:
+                        print "month dic i : ",i," j-1 : ",j-1
                         month_dic[i]['data'][j-1]['total'] += float(price)
     
     return month_dic
