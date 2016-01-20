@@ -25,6 +25,8 @@ from django.contrib.auth.models import User
 from HyberPay.models import UserContactModel, CredentialsModel, UserMailsModel,\
     MailAttachmentModel
 from HyberPay.DashBoard.dashboard import make_dashboard
+import traceback
+
 # Create your views here.
 def main_page(request):
     try:
@@ -234,6 +236,7 @@ def authTokenCheck(request):
             
             return jsonResp
         except Exception,error :
+            traceback.print_exc()
             html_cont = '<html><body>in test method  Error = ' + str(error) + '\n post data = ' + str(idinfo) + '\n userID =' + 'userid' + '\n email = '+ 'email' + '</body></html>'
             return HttpResponse(html_cont)
     
