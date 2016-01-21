@@ -37,6 +37,7 @@ class UserMailsModel(models.Model):
     
     class Meta:
         ordering = ['-timestamp']
+        unique_together = ("msgId", "ucm")
     #catagory, orderid item etc fields to be created later on
 
 class UserExpenseModel(models.Model):

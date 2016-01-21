@@ -104,8 +104,7 @@ def saveUserMails(usercontactmodel,mreaderlist):
     
     for mreader in mreaderlist:
         msgId = mreader.msgId
-        if len(UserMailsModel.objects.filter(msgId=msgId, ucm = usercontactmodel)) > 0:
-            continue
+        
         umm = UserMailsModel()
         umm.ucm = usercontactmodel
         
@@ -129,18 +128,21 @@ def saveUserMails(usercontactmodel,mreaderlist):
         umm.PURP = mreader.PURP
         
         #print 'message id: ',mreader.msgId
-        umm.save()
-        if mreader.no_of_files>0:
-            i=0;
-            att_id = mreader.att_id
-            for fname in mreader.filename:
-                mam = MailAttachmentModel()
-                mam.umm = umm
-                mam.fname = fname
-                mam.att_id = att_id[i]
-                i+=1
-                mam.save()
-                
+        try:
+            umm.save()
+            if mreader.no_of_files>0:
+                i=0;
+                att_id = mreader.att_id
+                for fname in mreader.filename:
+                    mam = MailAttachmentModel()
+                    mam.umm = umm
+                    mam.fname = fname
+                    mam.att_id = att_id[i]
+                    i+=1
+                    mam.save()
+        except:
+            pass
+                    
 
 def UpdateUserMails(usercontactmodel,mreaderlist):
     
