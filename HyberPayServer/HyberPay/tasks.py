@@ -71,7 +71,9 @@ def processMailsTask(user_id, timestamp,authToken):
     print "retrieving data"
     jsonlist = get_gmailData(user,msglist, mreaderlist)
     probableJsonList = get_probableMails(user,msglist, mreaderlist)
-    user.mailJson = jsonlist.__str__()
+    datalist = {"classified data" : jsonlist,
+                "probable data" : probableJsonList}
+    user.mailJson = datalist.__str__()
     user.save()
     print "write done :"
     print 'total time taken :',time.time()-tot_time
