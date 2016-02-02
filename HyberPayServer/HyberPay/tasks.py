@@ -112,7 +112,7 @@ def saveUserMails(usercontactmodel,mreaderlist):
         x = classifycleanfiles(mreader.html)
         writetofiles([x],'temp')
         x = readfiles('temp',True)
-        umm.text_mail = x[0] if x[0] else "" # previously error here
+        umm.text_mail = x[0] if x else "" # previously error here
         umm.html_mail = mreader.html
         umm.timestamp = mreader.date
         umm.sender = mreader.sender
@@ -159,8 +159,11 @@ def UpdateUserMails(usercontactmodel,mreaderlist):
         
         umm.ITEM = mreader.ITEM
         umm.PURP = mreader.PURP
-        
-        umm.category = mreader.category
+        try:
+            umm.category = mreader.category
+        except ValueError:
+            # mreader.category contains string
+            pass
         
         #print 'message id: ',mreader.msgId
         umm.save()
