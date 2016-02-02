@@ -104,7 +104,13 @@ def generateCredentialsFromAuthToken(authToken,user):
 def saveUserMails(usercontactmodel,mreaderlist):
     
     for mreader in mreaderlist:
-#         msgId = mreader.msgId
+        msgId = mreader.msgId
+        try:
+            umm = UserMailsModel.objects.get(msgId = msgId,ucm=usercontactmodel)
+            sen = umm.sender
+            continue
+        except:
+            pass
         
         umm = UserMailsModel()
         umm.ucm = usercontactmodel
