@@ -29,6 +29,8 @@ class MessageReader():
         
         self.DD = ""
         
+        self.category = ""
+        
     
     def setMsgId(self,msgId):
         self.msgId = msgId
@@ -78,4 +80,7 @@ class MessageReader():
     
     def setDEPLOC(self,DEPLOC):
         self.DEPLOC=DEPLOC
+        
+    def setCategory(self,category):
+        self.category = category
         

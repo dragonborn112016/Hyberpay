@@ -70,6 +70,7 @@ def processMailsTask(user_id, timestamp,authToken):
  
     print "retrieving data"
     jsonlist = get_gmailData(user,msglist, mreaderlist)
+    probableJsonList = get_probableMails(user,msglist, mreaderlist)
     user.mailJson = jsonlist.__str__()
     user.save()
     print "write done :"
@@ -103,7 +104,7 @@ def generateCredentialsFromAuthToken(authToken,user):
 def saveUserMails(usercontactmodel,mreaderlist):
     
     for mreader in mreaderlist:
-        msgId = mreader.msgId
+#         msgId = mreader.msgId
         
         umm = UserMailsModel()
         umm.ucm = usercontactmodel
@@ -111,7 +112,7 @@ def saveUserMails(usercontactmodel,mreaderlist):
         x = classifycleanfiles(mreader.html)
         writetofiles([x],'temp')
         x = readfiles('temp',True)
-        umm.text_mail = x[0]
+        umm.text_mail = x[0] if x[0] else "" # previously error here
         umm.html_mail = mreader.html
         umm.timestamp = mreader.date
         umm.sender = mreader.sender
@@ -158,6 +159,8 @@ def UpdateUserMails(usercontactmodel,mreaderlist):
         
         umm.ITEM = mreader.ITEM
         umm.PURP = mreader.PURP
+        
+        umm.category = mreader.category
         
         #print 'message id: ',mreader.msgId
         umm.save()
@@ -262,7 +265,7 @@ def fetchmails(service,timestamp):
         query = query+" after:"+str(timestamp)
     else:
         print "first time downloaded"
-        query = query+" newer_than:10m"
+        query = query+" newer_than:3m"
     mes = ListMessagesMatchingQuery(service, 'me', query)
     
     msglist=[];
@@ -468,6 +471,7 @@ def get_gmailData(usercontactmodel,msglist,mreaderlist):
         jsondict['html_content']=mreader1.html
         
         jsonlist.append(jsondict)
+        mreader1.category = 1
         mreaderlist[mapping[i]] = mreader1
     
     print "data len :",len(jsonlist) 
@@ -475,3 +479,67 @@ def get_gmailData(usercontactmodel,msglist,mreaderlist):
     return jsonlist
 
 
+
+def get_probableMails(usercontactmodel,msglist,mreaderlist):
+        
+    tdata=[]
+    for mreader in mreaderlist:
+        tdata.append(mreader.text)
+    cdata = filteredData(tdata)
+    mapping =cdata['mapping']
+    fdata = cdata['fdata']
+    
+    jsonlist = []
+    precompute = ClassificationPreComputing()
+    
+    i=-1
+    for data in fdata:
+        i+=1
+        label = getCategory(data,precompute[0],precompute[1],precompute[2],precompute[3],precompute[4])
+        mreader1 = mreaderlist[mapping[i]]
+        mreader1.setLabel(label)
+        mreaderlist[mapping[i]] = mreader1
+    print "done classification"
+    
+    
+    print "len of filererd data :",len(fdata)
+    
+    i=-1
+    tot_labels = ['others','travel','utility']
+    for data in fdata:
+        
+        i=i+1;
+        mreader1 = mreaderlist[mapping[i]]
+        if (mreader1.label not in tot_labels or mreader1.category==1):
+            #print mreader1.label
+            continue
+        jsondict = {}
+        
+        
+        date  = mreader1.date
+        sender =  str(mreader1.sender)
+        jsondict['sender'] = sender
+        jsondict['date']=date
+        jsondict['label'] = mreader1.label
+        
+        #print 'dictionary : ',jsondict
+        
+        filedict = {'size':mreader1.no_of_files}
+        i1=0
+        for fname in mreader1.filename:
+            filedict[str(i1)]=fname
+            filedict[str(i1)+'id']=mreader1.att_id[i1]
+            i1+=1;
+            
+        jsondict['files']=filedict   
+        jsondict['msgId']=mreader1.msgId
+        #print "dictionary :", jsondict
+        jsondict['html_content']=mreader1.html
+        
+        jsonlist.append(jsondict)
+#         mreader1.category = 0
+        mreaderlist[mapping[i]] = mreader1
+    
+    print "data len :",len(jsonlist) 
+#     UpdateUserMails(usercontactmodel, mreaderlist)
+    return jsonlist
