@@ -29,7 +29,7 @@ class MessageReader():
         
         self.DD = ""
         
-        self.category = ""
+        self.category = 0
         
     
     def setMsgId(self,msgId):

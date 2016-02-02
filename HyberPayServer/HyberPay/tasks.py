@@ -159,11 +159,8 @@ def UpdateUserMails(usercontactmodel,mreaderlist):
         
         umm.ITEM = mreader.ITEM
         umm.PURP = mreader.PURP
-        try:
-            umm.category = mreader.category
-        except ValueError:
-            # mreader.category contains string
-            pass
+        umm.category = mreader.category
+        
         
         #print 'message id: ',mreader.msgId
         umm.save()
