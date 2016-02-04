@@ -180,8 +180,8 @@ def getListfromdb(usercontactmodel):
     mreaderlist=[]
     
     for umm in res:
-        if umm.category ==1:
-            continue
+#         if umm.category ==1:
+#             continue
         mams = MailAttachmentModel.objects.filter(umm=umm)
         filename= []
         att_ids=[]
@@ -405,7 +405,7 @@ def get_gmailData(usercontactmodel,msglist,mreaderlist):
             
             #print mreader1.ITEM
             #print type(mreader1.ITEM)
-            if not mreader1.ITEM :
+            if (not mreader1.ITEM) and (mreader1.category == 0):
                 nertags = ner(data, others_glm)
                 jsondict.update(fetch_nertag_item(nertags))
                 mreader1.ITEM = jsondict["ITEM"] if jsondict.has_key("ITEM") else ""
@@ -416,7 +416,7 @@ def get_gmailData(usercontactmodel,msglist,mreaderlist):
             #print 'time taken for others :',time.time()-strt_time
         
         elif mreader1.label == 'utility':
-            if not mreader1.DD :
+            if (not mreader1.DD) and (mreader1.category == 0) :
                 nertags = ner(data, utility_glm)
                 dd_dic = fetch_nertag(nertags)
                 try :
@@ -432,7 +432,7 @@ def get_gmailData(usercontactmodel,msglist,mreaderlist):
         
         elif mreader1.label == 'travel':
             
-            if not mreader1.DOD :
+            if (not mreader1.DOD) and (mreader1.category == 0) :
                 
                 nertags = ner(data, dod_travel_glm)
                 dod_dic = fetch_nertag(nertags)
