@@ -400,6 +400,9 @@ def get_gmailData(usercontactmodel,msglist,mreaderlist):
         jsondict['ammount'] = amt
         mreader1.amount = amt
         jsondict['label'] = mreader1.label
+        
+        print mreader1.category
+        
         if mreader1.category == 1:
             
             
