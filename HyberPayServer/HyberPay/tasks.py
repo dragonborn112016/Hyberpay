@@ -270,7 +270,7 @@ def fetchmails(service,timestamp):
     
     query="label:inbox ({+order +transaction +booking +booked +ticket +pnr +bill+invoice}"+" {+price +fare +amount} {+id +no})"
     if timestamp:
-        query = query+" after:"+str(timestamp)
+        query = query+" after:"+str(timestamp/1000)
     else:
         print "first time downloaded"
         query = query+" newer_than:3m"
