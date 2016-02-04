@@ -208,6 +208,8 @@ def getListfromdb(usercontactmodel):
         mreader.setITEM(umm.ITEM)
         mreader.setPURP(umm.PURP)
         
+        mreader.setCategory(umm.category)
+        
         mreaderlist.append(mreader)
         msglist.append(umm.html_mail)
     res = [msglist,mreaderlist]
