@@ -345,10 +345,10 @@ def get_gmailData(usercontactmodel,msglist,mreaderlist):
         mreader1 = mreaderlist[mapping[i]]
         mreader1.setLabel(label)
         mreaderlist[mapping[i]] = mreader1
-    print "done classification"
+#     print "done classification"
     
     
-    print "len of filererd data :",len(fdata)
+#     print "len of filererd data :",len(fdata)
     
     others_glm = item_name.GLM()
     utility_glm = utility_bills.GLM()
@@ -403,7 +403,7 @@ def get_gmailData(usercontactmodel,msglist,mreaderlist):
         mreader1.amount = amt
         jsondict['label'] = mreader1.label
         
-        print mreader1.category
+#         print mreader1.category
         
         if mreader1.category == 1:
             
@@ -528,10 +528,10 @@ def get_probableMails(usercontactmodel,msglist,mreaderlist):
         mreader1 = mreaderlist[mapping[i]]
         mreader1.setLabel(label)
         mreaderlist[mapping[i]] = mreader1
-    print "done classification"
+#     print "done classification"
     
     
-    print "len of filererd data :",len(fdata)
+#     print "len of filererd data :",len(fdata)
     
     i=-1
     tot_labels = ['others','travel','utility']
