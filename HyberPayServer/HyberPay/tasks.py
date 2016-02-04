@@ -400,64 +400,76 @@ def get_gmailData(usercontactmodel,msglist,mreaderlist):
         jsondict['ammount'] = amt
         mreader1.amount = amt
         jsondict['label'] = mreader1.label
-        
-        if mreader1.label == 'others':
+        if mreader1.category == 1:
             
-            #print mreader1.ITEM
-            #print type(mreader1.ITEM)
-            if (not mreader1.ITEM) and (mreader1.category == 0):
-                nertags = ner(data, others_glm)
-                jsondict.update(fetch_nertag_item(nertags))
-                mreader1.ITEM = jsondict["ITEM"] if jsondict.has_key("ITEM") else ""
-                mreader1.PURP = jsondict["PURP"] if jsondict.has_key("PURP") else ""
-            else:
-                jsondict.update({"ITEM" : mreader1.ITEM,
-                                 "PURP" : mreader1.PURP})
-            #print 'time taken for others :',time.time()-strt_time
-        
-        elif mreader1.label == 'utility':
-            if (not mreader1.DD) and (mreader1.category == 0) :
-                nertags = ner(data, utility_glm)
-                dd_dic = fetch_nertag(nertags)
-                try :
-                    dte = parse(dd_dic["DD"])
-                    dd_dic["DD"] = str(dte.day) + '/' + str(dte.month) + '/' + str(dte.year)
-                except Exception,e:
-                    print "exception parsing DD: error :",dd_dic," : Error :" ,e
-                jsondict.update(dd_dic)
-                mreader1.DD = jsondict["DD"] if jsondict.has_key("DD") else ""
-            else:
-                jsondict.update({"DD" : mreader1.DD})
-            #print 'time taken for utility :',time.time()-strt_time
-        
-        elif mreader1.label == 'travel':
             
-            if (not mreader1.DOD) and (mreader1.category == 0) :
+            jsondict.update({
+                                "ITEM" : mreader1.ITEM,
+                                "PURP" : mreader1.PURP,
+                                "DD" : mreader1.DD,
+                                "DOD" : mreader1.DOD,
+                                "TOD" : mreader1.TOD,
+                                "DEPLOC" : mreader1.DEPLOC
+                            })
+        else :
+        
+            if mreader1.label == 'others':
                 
-                nertags = ner(data, dod_travel_glm)
-                dod_dic = fetch_nertag(nertags)
-                try :
-                    dte = parse(dod_dic["DOD"])
-                    dod_dic["DOD"] = str(dte.day) + '/' + str(dte.month) + '/' + str(dte.year)
-                except Exception,e:
-                    print "exception parsing DOD: error:",dod_dic," : Error: " ,e
-                jsondict.update(dod_dic)
+                #print mreader1.ITEM
+                #print type(mreader1.ITEM)
+                if not mreader1.ITEM :
+                    nertags = ner(data, others_glm)
+                    jsondict.update(fetch_nertag_item(nertags))
+                    mreader1.ITEM = jsondict["ITEM"] if jsondict.has_key("ITEM") else ""
+                    mreader1.PURP = jsondict["PURP"] if jsondict.has_key("PURP") else ""
+                else:
+                    jsondict.update({"ITEM" : mreader1.ITEM,
+                                     "PURP" : mreader1.PURP})
+                #print 'time taken for others :',time.time()-strt_time
+            
+            elif mreader1.label == 'utility':
+                if not mreader1.DD :
+                    nertags = ner(data, utility_glm)
+                    dd_dic = fetch_nertag(nertags)
+                    try :
+                        dte = parse(dd_dic["DD"])
+                        dd_dic["DD"] = str(dte.day) + '/' + str(dte.month) + '/' + str(dte.year)
+                    except Exception,e:
+                        print "exception parsing DD: error :",dd_dic," : Error :" ,e
+                    jsondict.update(dd_dic)
+                    mreader1.DD = jsondict["DD"] if jsondict.has_key("DD") else ""
+                else:
+                    jsondict.update({"DD" : mreader1.DD})
+                #print 'time taken for utility :',time.time()-strt_time
+            
+            elif mreader1.label == 'travel':
                 
-                nertags = ner(data, tod_travel_glm)
-                jsondict.update(fetch_nertag(nertags))
-                
-                nertags = ner(data, deploc_travel_glm)
-                jsondict.update(fetch_nertag(nertags))
-                
-                mreader1.DOD = jsondict["DOD"] if jsondict.has_key("DOD") else ""
-                mreader1.TOD = jsondict["TOD"] if jsondict.has_key("TOD") else ""
-                mreader1.DEPLOC = jsondict["DEPLOC"] if jsondict.has_key("DEPLOC") else ""
-            else:
-                jsondict.update({"DOD" : mreader1.DOD,
-                                 "TOD" : mreader1.TOD,
-                                 "DEPLOC" : mreader1.DEPLOC})
-            #print 'time taken for travel :',time.time()-strt_time
-                
+                if not mreader1.DOD :
+                    
+                    nertags = ner(data, dod_travel_glm)
+                    dod_dic = fetch_nertag(nertags)
+                    try :
+                        dte = parse(dod_dic["DOD"])
+                        dod_dic["DOD"] = str(dte.day) + '/' + str(dte.month) + '/' + str(dte.year)
+                    except Exception,e:
+                        print "exception parsing DOD: error:",dod_dic," : Error: " ,e
+                    jsondict.update(dod_dic)
+                    
+                    nertags = ner(data, tod_travel_glm)
+                    jsondict.update(fetch_nertag(nertags))
+                    
+                    nertags = ner(data, deploc_travel_glm)
+                    jsondict.update(fetch_nertag(nertags))
+                    
+                    mreader1.DOD = jsondict["DOD"] if jsondict.has_key("DOD") else ""
+                    mreader1.TOD = jsondict["TOD"] if jsondict.has_key("TOD") else ""
+                    mreader1.DEPLOC = jsondict["DEPLOC"] if jsondict.has_key("DEPLOC") else ""
+                else:
+                    jsondict.update({"DOD" : mreader1.DOD,
+                                     "TOD" : mreader1.TOD,
+                                     "DEPLOC" : mreader1.DEPLOC})
+                #print 'time taken for travel :',time.time()-strt_time
+                    
         
         
         #print 'dictionary : ',jsondict
