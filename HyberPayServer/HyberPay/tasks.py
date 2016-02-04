@@ -276,6 +276,8 @@ def fetchmails(service,timestamp):
         query = query+" newer_than:3m"
     mes = ListMessagesMatchingQuery(service, 'me', query)
     
+    print " no of messeges to be fetched: ",len(mes)
+    
     msglist=[];
     mreaderlist = []
     

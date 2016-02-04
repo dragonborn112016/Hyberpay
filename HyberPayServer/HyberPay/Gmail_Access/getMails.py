@@ -154,8 +154,11 @@ def get_mailIdsForAndroid(request,user,authToken):
     timestamp = 0
     try:
         umm = UserMailsModel.objects.filter(ucm =user).aggregate(Max('timestamp'))
-        print umm
+#         print umm
         timestamp = umm['timestamp__max']
+        print " timestamp :",timestamp
+        umm1 = UserMailsModel.objects.filter(ucm =user)[0]
+        print " timestamp from umm :",umm1.timestamp
     except Exception,error:
         print "exception while reading database %s" %error  
          
