@@ -180,6 +180,8 @@ def getListfromdb(usercontactmodel):
     mreaderlist=[]
     
     for umm in res:
+        if umm.category ==1:
+            continue
         mams = MailAttachmentModel.objects.filter(umm=umm)
         filename= []
         att_ids=[]
