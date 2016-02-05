@@ -23,6 +23,7 @@ class MessageReader():
         self.DOD = ""
         self.TOD = ""
         self.DEPLOC = ""
+        self.ARVLOC = ""
         
         self.ITEM = ""
         self.PURP = ""
@@ -79,6 +80,9 @@ class MessageReader():
         self.TOD=TOD
     
     def setDEPLOC(self,DEPLOC):
+        self.DEPLOC=DEPLOC
+    
+    def setARVLOC(self,DEPLOC):
         self.DEPLOC=DEPLOC
         
     def setCategory(self,category):

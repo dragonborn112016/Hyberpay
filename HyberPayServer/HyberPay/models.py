@@ -27,6 +27,7 @@ class UserMailsModel(models.Model):
     DOD = models.TextField(null=True,blank=True)
     DEPLOC = models.TextField(null=True,blank=True)
     TOD = models.TextField(null=True,blank=True)
+    ARVLOC = models.TextField(null=True,blank=True)
     
     DD = models.TextField(null=True,blank=True)
     

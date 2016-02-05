@@ -9,9 +9,9 @@ these functions are a part of threads and in a direct link with Gmail_Access/get
 '''
 
 from HyberPay.NER.common_functions import ner, OTHERS_MODEL, UTILITY_MODEL,\
-     DOD_MODEL, TOD_MODEL, DEPLOC_MODEL
+     DOD_MODEL, TOD_MODEL, DEPLOC_MODEL, ARVLOC_MODEL
 from HyberPay.NER import utility_bills, dod_travel,\
-    tod_travel, deploc_travel,item_name
+    tod_travel, deploc_travel,item_name, arvloc_travel
 from dateutil.parser import parse
 from HyberPay.DashBoard.dashboard_utility import get_price
 from HyberPay.Classification.traindata import ClassificationPreComputing, getCategory
@@ -132,6 +132,7 @@ def saveUserMails(usercontactmodel,mreaderlist):
         umm.DOD = mreader.DOD
         umm.TOD = mreader.TOD
         umm.DEPLOC = mreader.DEPLOC
+        umm.ARVLOC = mreader.ARVLOC
         
         umm.ITEM = mreader.ITEM
         umm.PURP = mreader.PURP
@@ -164,6 +165,7 @@ def UpdateUserMails(usercontactmodel,mreaderlist):
         umm.DOD = mreader.DOD
         umm.TOD = mreader.TOD
         umm.DEPLOC = mreader.DEPLOC
+        umm.ARVLOC = mreader.ARVLOC
         
         umm.ITEM = mreader.ITEM
         umm.PURP = mreader.PURP
@@ -185,9 +187,11 @@ def getListfromdb(usercontactmodel):
         mams = MailAttachmentModel.objects.filter(umm=umm)
         filename= []
         att_ids=[]
+        
         for mam in mams:
             filename.append(mam.fname)
             att_ids.append(mam.att_id)
+        
         mreader= MessageReader()
         mreader.filename=filename
         mreader.setDate(umm.timestamp)
@@ -204,6 +208,7 @@ def getListfromdb(usercontactmodel):
         mreader.setDOD(umm.DOD)
         mreader.setTOD(umm.TOD)
         mreader.setDEPLOC(umm.DEPLOC)
+        mreader.setARVLOC(umm.ARVLOC)
         
         mreader.setITEM(umm.ITEM)
         mreader.setPURP(umm.PURP)
@@ -357,7 +362,7 @@ def get_gmailData(usercontactmodel,msglist,mreaderlist):
     #toa_travel_glm = toa_travel.GLM()
     tod_travel_glm = tod_travel.GLM()
     deploc_travel_glm = deploc_travel.GLM()
-    #arvloc_travel_glm = arvloc_travel.GLM()
+    arvloc_travel_glm = arvloc_travel.GLM()
     
     others_glm.decode(open(OTHERS_MODEL))
     utility_glm.decode(open(UTILITY_MODEL))
@@ -366,7 +371,7 @@ def get_gmailData(usercontactmodel,msglist,mreaderlist):
     #toa_travel_glm.decode(open(TOA_MODEL))
     tod_travel_glm.decode(open(TOD_MODEL))
     deploc_travel_glm.decode(open(DEPLOC_MODEL))
-    #arvloc_travel_glm.decode(open(ARVLOC_MODEL))
+    arvloc_travel_glm.decode(open(ARVLOC_MODEL))
     
     i=-1
     tot_labels = ['others','travel','utility']
@@ -414,7 +419,8 @@ def get_gmailData(usercontactmodel,msglist,mreaderlist):
                                 "DD" : mreader1.DD,
                                 "DOD" : mreader1.DOD,
                                 "TOD" : mreader1.TOD,
-                                "DEPLOC" : mreader1.DEPLOC
+                                "DEPLOC" : mreader1.DEPLOC,
+                                "ARVLOC" : mreader1.ARVLOC
                             })
         else :
         
@@ -465,14 +471,20 @@ def get_gmailData(usercontactmodel,msglist,mreaderlist):
                     
                     nertags = ner(data, deploc_travel_glm)
                     jsondict.update(fetch_nertag(nertags))
+
+                    nertags = ner(data, arvloc_travel_glm)
+                    jsondict.update(fetch_nertag(nertags))
+
                     
                     mreader1.DOD = jsondict["DOD"] if jsondict.has_key("DOD") else ""
                     mreader1.TOD = jsondict["TOD"] if jsondict.has_key("TOD") else ""
                     mreader1.DEPLOC = jsondict["DEPLOC"] if jsondict.has_key("DEPLOC") else ""
+                    mreader1.ARVLOC = jsondict["ARVLOC"] if jsondict.has_key("ARVLOC") else ""
                 else:
                     jsondict.update({"DOD" : mreader1.DOD,
                                      "TOD" : mreader1.TOD,
-                                     "DEPLOC" : mreader1.DEPLOC})
+                                     "DEPLOC" : mreader1.DEPLOC,
+                                     "ARVLOC" : mreader1.ARVLOC})
                 #print 'time taken for travel :',time.time()-strt_time
                     
         
