@@ -282,7 +282,7 @@ def fetchmails(service,timestamp):
         query = query+" after:"+str(timestamp/1000)
     else:
         print "first time downloaded"
-        query = query+" newer_than:3m"
+        query = query+" newer_than:12m"
     mes = ListMessagesMatchingQuery(service, 'me', query)
     
     print " no of messeges to be fetched: ",len(mes)
