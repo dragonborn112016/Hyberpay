@@ -410,7 +410,7 @@ def get_gmailData(usercontactmodel,msglist,mreaderlist):
         
 #         print mreader1.category
         
-        if mreader1.category == 1:
+        if mreader1.category == 2:
             
             
             jsondict.update({
@@ -481,10 +481,10 @@ def get_gmailData(usercontactmodel,msglist,mreaderlist):
                     mreader1.DEPLOC = jsondict["DEPLOC"] if jsondict.has_key("DEPLOC") else ""
                     mreader1.ARVLOC = jsondict["ARVLOC"] if jsondict.has_key("ARVLOC") else ""
                    
-                    print " time of departure :",  mreader1.TOD
-                    print " departure date :",  mreader1.DOD
-                    print " departure location :",  mreader1.DEPLOC
-                    print " Arrival location :",  mreader1.ARVLOC
+#                     print " time of departure :",  mreader1.TOD
+#                     print " departure date :",  mreader1.DOD
+#                     print " departure location :",  mreader1.DEPLOC
+#                     print " Arrival location :",  mreader1.ARVLOC
                     
                 else:
                     jsondict.update({"DOD" : mreader1.DOD,
