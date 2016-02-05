@@ -282,7 +282,7 @@ def fetchmails(service,timestamp):
         query = query+" after:"+str(timestamp/1000)
     else:
         print "first time downloaded"
-        query = query+" newer_than:12m"
+        query = query+" newer_than:4m"
     mes = ListMessagesMatchingQuery(service, 'me', query)
     
     print " no of messeges to be fetched: ",len(mes)
@@ -480,9 +480,11 @@ def get_gmailData(usercontactmodel,msglist,mreaderlist):
                     mreader1.TOD = jsondict["TOD"] if jsondict.has_key("TOD") else ""
                     mreader1.DEPLOC = jsondict["DEPLOC"] if jsondict.has_key("DEPLOC") else ""
                     mreader1.ARVLOC = jsondict["ARVLOC"] if jsondict.has_key("ARVLOC") else ""
-                    
-#                     print " departure location :",  mreader1.DEPLOC
-#                     print " Arrival location :",  mreader1.ARVLOC
+                   
+                    print " time of departure :",  mreader1.TOD
+                    print " departure date :",  mreader1.DOD
+                    print " departure location :",  mreader1.DEPLOC
+                    print " Arrival location :",  mreader1.ARVLOC
                     
                 else:
                     jsondict.update({"DOD" : mreader1.DOD,
