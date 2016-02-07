@@ -335,8 +335,8 @@ def fetch_nertag(nertag):
     iname = ''
     tag =[]
     
-    print " word tag pairs:"
-    print nertag.split('\n')
+#     print " word tag pairs:"
+#     print nertag.split('\n')
     for wt in nertag.split('\n'):
         same_flag = False
         if res.has_key(wt):
