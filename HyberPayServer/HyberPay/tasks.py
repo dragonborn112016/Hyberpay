@@ -124,6 +124,7 @@ def saveUserMails(usercontactmodel,mreaderlist):
         umm.html_mail = mreader.html
         umm.timestamp = mreader.date
         umm.sender = mreader.sender
+        umm.Subject = mreader.Subject
         umm.noOfFiles = mreader.no_of_files
         umm.msgId = mreader.msgId
         
@@ -198,6 +199,7 @@ def getListfromdb(usercontactmodel):
         mreader.setHtml(umm.html_mail)
         mreader.setNoOfFiles(0)
         mreader.setSender(umm.sender)
+        mreader.setSubject(umm.Subject)
         mreader.setText(umm.text_mail)
         mreader.setNoOfFiles(umm.noOfFiles)
         mreader.setMsgId(umm.msgId)
@@ -296,10 +298,16 @@ def fetchmails(service,timestamp):
             mheaders =  message['payload']['headers']
             mdate = message['internalDate']
             msender =""
+            mSubject =""
             for header in mheaders:
                 name = header['name']
                 if name=="from" or name == "From":
                     msender = header['value']
+                    break
+            for header in mheaders:
+                name = header['name']
+                if name=="Subject" or name == "subject":
+                    mSubject = header['value']
                     break
             mparts =  message['payload']['parts']
             
@@ -324,6 +332,7 @@ def fetchmails(service,timestamp):
         
         mreader.setDate(mdate)
         mreader.setSender(msender)
+        mreader.setSubject(mSubject)
         msglist.append(mreader.html)
         mreaderlist.append(mreader)
     
@@ -405,6 +414,7 @@ def get_gmailData(usercontactmodel,msglist,mreaderlist):
         jsondict['date']=date
         
         jsondict['ammount'] = amt
+        jsondict['Subject'] = mreader1.Subject
         mreader1.amount = amt
         jsondict['label'] = mreader1.label
         
@@ -566,6 +576,7 @@ def get_probableMails(usercontactmodel,msglist,mreaderlist):
         date  = mreader1.date
         sender =  str(mreader1.sender)
         jsondict['sender'] = sender
+        jsondict['Subject'] = str(mreader1.Subject)
         jsondict['date']=date
         jsondict['label'] = mreader1.label
         

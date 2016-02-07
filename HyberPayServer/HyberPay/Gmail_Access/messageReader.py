@@ -18,6 +18,8 @@ class MessageReader():
         self.date = 0
         self.label = ""
         
+        self.Subject = ""
+        
         self.amount = ""
         
         self.DOD = ""
@@ -87,4 +89,7 @@ class MessageReader():
         
     def setCategory(self,category):
         self.category = category
+    
+    def setSubject(self,Subject):
+        self.Subject = Subject
         

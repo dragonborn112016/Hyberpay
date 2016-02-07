@@ -35,6 +35,8 @@ class UserMailsModel(models.Model):
     
     PURP = models.TextField(null=True,blank=True)
     
+    Subject = models.TextField(null=True,blank=True)
+    
     
     class Meta:
         ordering = ['-timestamp']
