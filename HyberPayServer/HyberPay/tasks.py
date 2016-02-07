@@ -460,9 +460,11 @@ def get_gmailData(usercontactmodel,msglist,mreaderlist):
                     nertags = ner(data, dod_travel_glm)
                     dod_dic = fetch_nertag(nertags)
                     try :
-                        dte = parse(dod_dic["DOD"])
                         print  " orignal date : ",dod_dic["DOD"]
+            
+                        dte = parse(dod_dic["DOD"])
                         print  " parsed date : ",dte
+                        
                         dod_dic["DOD"] = str(dte.day) + '/' + str(dte.month) + '/' + str(dte.year)
                     except Exception,e:
                         print "exception parsing DOD: error:",dod_dic," : Error: " ,e
