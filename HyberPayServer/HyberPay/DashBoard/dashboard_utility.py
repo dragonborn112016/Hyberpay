@@ -41,10 +41,10 @@ def get_price(data):
 
 def get_month_dic():
     return {'month':0,
-            'data':[{'label':category['1'],'total':0},
-                    {'label':category['2'],'total':0},
-                    {'label':category['3'],'total':0}
-                    ]
+            'data':[{'label':category['1'],'total':0,'msgIds' : []},
+                    {'label':category['2'],'total':0,'msgIds' : []},
+                    {'label':category['3'],'total':0,'msgIds' : []}
+                    ],
             }
 
 
@@ -71,6 +71,7 @@ def get_monthly_expense(umm,for_months):
     mCatKeys = category.keys()
     mCatVal = [category['1'],category['2'],category['3']]
     for m in umm:
+        msg_Id = m.msgId
         timestamp = m.timestamp
         dte = time.strftime('%d/%m/%Y',  time.gmtime(int(timestamp)/1000))
         dte1 = dte.split('/')
@@ -85,6 +86,7 @@ def get_monthly_expense(umm,for_months):
                 if category[str(j)] == m_label: 
                     if m_label in mCatVal:
                         month_dic[i]['data'][j-1]['total'] += float(price)
+                        month_dic[i]['data'][j-1]['msgIds'].append(msg_Id)
         else:
             #month_dic[i['month']] = cur_month
             
@@ -102,5 +104,6 @@ def get_monthly_expense(umm,for_months):
 #                         print "month dic i : ",i," j-1 : ",j-1
 #                         print "After cur month :",cur_month," mail month : ",m_month
                         month_dic[i]['data'][j-1]['total'] += float(price)
+                        month_dic[i]['data'][j-1]['msgIds'].append(msg_Id)
     
     return month_dic
