@@ -466,7 +466,7 @@ def get_gmailData(usercontactmodel,msglist,mreaderlist):
                         dte = parse(dod_dic["DOD"])
                         print  " parsed date : "
                         dod_dic["DOD"] = str(dte.day) + '/' + str(dte.month) + '/' + str(dte.year)
-                        dte = parse(dod_dic["DOD"])
+                        print dod_dic["DOD"]
                     except Exception,e:
                         print "exception parsing DOD: error:",dod_dic," : Error: " ,e
                     jsondict.update(dod_dic)
