@@ -410,7 +410,7 @@ def get_gmailData(usercontactmodel,msglist,mreaderlist):
         
 #         print mreader1.category
         
-        if mreader1.category == 2:
+        if mreader1.category == 1:
             
             
             jsondict.update({
