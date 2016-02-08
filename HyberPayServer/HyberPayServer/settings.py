@@ -128,7 +128,7 @@ DATABASES = {
     }
 }
       
-DATABASES['default'] =  dj_database_url.config()
+DATABASES['default'] =  dj_database_url.config(default='postgres://ubk0iovar43ob4:paqer8olvv7huubdlk37neuknsm@ec2-52-5-91-185.compute-1.amazonaws.com:5432/d5n7nblj9cgicm')
 
 SOCIAL_AUTH_PIPELINE = (
     'social.pipeline.social_auth.social_details',
