@@ -121,13 +121,13 @@ WSGI_APPLICATION = 'HyberPayServer.wsgi.application'
 #     }
 # }
 
- 
+  
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2'
+        'ENGINE': 'django.db.backends.postgresql_psycopg2' 
     }
 }
-     
+      
 DATABASES['default'] =  dj_database_url.config()
 
 SOCIAL_AUTH_PIPELINE = (
