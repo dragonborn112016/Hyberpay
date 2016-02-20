@@ -196,6 +196,7 @@ def store_data():
     travel = []
     other = []
     utility=[]
+    negetive = []
     for i in range(len(X)):
         if Y[i] == 'travel':
             travel.append(X[i])
@@ -203,12 +204,13 @@ def store_data():
             other.append(X[i])
         elif Y[i] == 'utility':
             utility.append(X[i])
-      
+        else:
+            negetive.append(X[i])
+        
+    writetofiles(negetive, 'negetive')  
     writetofiles(travel, 'travel')
     writetofiles(other, 'others')
     writetofiles(utility, 'utility')
   
-#===============================================================================
 # store_data()
 # print 'done'
-#===============================================================================

@@ -20,7 +20,8 @@ import dj_database_url
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
-BROKER_URL = "amqp://slygjywy:LzkBPpllHNqIXcWjhtew9Hok0Wmm_Nwi@jaguar.rmq.cloudamqp.com/slygjywy"
+#BROKER_URL = "amqp://slygjywy:LzkBPpllHNqIXcWjhtew9Hok0Wmm_Nwi@jaguar.rmq.cloudamqp.com/slygjywy"
+BROKER_URL = "amqp://vfxchibh:K0ohQ-klkYNIqbZsFLA_ss6lqoIOpqtp@moose.rmq.cloudamqp.com/vfxchibh"
 #BROKER_URL = 'amqp://guest@localhost//'
 #===============================================================================
 # : Only add pickle to this list if your broker is secured
@@ -113,7 +114,7 @@ WSGI_APPLICATION = 'HyberPayServer.wsgi.application'
 # DATABASES = {
 #     'default': {
 #         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-#         'NAME': 'hyberpay',                      
+#         'NAME': 'hyberpaydb',                      
 #         'USER': 'hyberpayUser',
 #         'PASSWORD': 'sidharth',
 #         'HOST': 'localhost',
@@ -121,13 +122,13 @@ WSGI_APPLICATION = 'HyberPayServer.wsgi.application'
 #     }
 # }
 
-  
+   
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2' 
     }
 }
-      
+       
 DATABASES['default'] =  dj_database_url.config(default='postgres://ubk0iovar43ob4:paqer8olvv7huubdlk37neuknsm@ec2-52-5-91-185.compute-1.amazonaws.com:5432/d5n7nblj9cgicm')
 
 SOCIAL_AUTH_PIPELINE = (
